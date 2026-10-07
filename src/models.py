@@ -11,18 +11,6 @@ treated as equal-confidence to a manual entry. They get flagged in
 DesignOutputs.warnings until the engineer confirms/overrides them.
 This mirrors the existing assumptions/warnings transparency pattern
 in the design engine.
-
-An Intze tank is a circular elevated water storage tank made of:
-  - Top dome           (spherical cap, roof)
-  - Top ring beam      (takes ring tension from top dome thrust)
-  - Cylindrical wall    (main container, holds most of the water)
-  - Bottom ring beam / "Intze" ring girder (takes the horizontal thrust
-    from the conical bottom, which is the defining feature of an
-    Intze tank -- it means the staging only carries vertical load,
-    not the outward thrust of the water)
-  - Conical bottom dome (frustum, funnels water down)
-  - Bottom (base) dome  (spherical cap, floor of the funnel)
-  - Staging             (columns + bracing that lift the tank to height)
 """
 
 from dataclasses import dataclass, field
@@ -52,7 +40,7 @@ class DesignInputs:
     """Parameters the engineer/user provides."""
     capacity_liters: float          # required water storage capacity
     staging_height_m: float         # height from ground to bottom of tank
-    num_columns: int = 8            # staging columns (6, 8, 10 typical)
+    num_columns: int = 8            # staging columns (6, 8, 10, 12 typical)
     soil_bearing_capacity_kpa: float = 150.0   # from soil report
     soil_source: str = "manual"     # "manual" | "auto_map" -- see note below
     free_board_m: float = 0.30      # air gap above water level
@@ -63,6 +51,8 @@ class DesignInputs:
     steel_grade_mpa: float = 415.0      # Fe415 typical
     permissible_bearing_kpa: float = None  # if None, taken = soil_bearing_capacity_kpa
     location: SiteLocation = None
+    basic_wind_speed_m_s: float = 44.0   # IS 875 basic wind speed, site-dependent
+    seismic_zone_factor: float = 0.16    # IS 1893 zone factor (Zone III default)
 
 
 @dataclass

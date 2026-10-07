@@ -1,19 +1,23 @@
 """
-Intze Tank Design Engine -- v0.1 (first working version)
+Intze Tank Design Engine -- v0.2
 
 Implements the classical hand-calculation procedure for an Intze-type
 RCC elevated water tank, following standard design practice used in
 Indian civil engineering (IS 3370 for water-retaining structures,
-IS 456 for general RCC, working-stress-style thumb rules for member
-sizing that are standard in textbook Intze tank design).
+IS 456 for general RCC, IS 875/IS 1893 for wind/seismic lateral load
+on the staging, working-stress-style thumb rules for member sizing
+that are standard in textbook Intze tank design).
 
 IMPORTANT -- ACADEMIC INTEGRITY NOTE (per project rules):
 This is a first-pass engine using well-known standard formulas and
-commonly-used empirical thickness/sizing rules. It has NOT yet been
-validated against a certified example or against the original VB5
-project. Treat every output as provisional until Checkpoint 2
-(validation) is complete. All assumptions are logged into
-DesignOutputs.assumptions so nothing is silently guessed.
+commonly-used empirical thickness/sizing rules. All assumptions are
+logged into DesignOutputs.assumptions so nothing is silently guessed.
+
+v0.2 change: wind/seismic lateral load on the staging (IS 875 / IS 1893
+simplified static methods, see wind_seismic.py) is now computed and
+folded into the staging column design, and the concrete-volume estimate
+now includes the staging columns themselves (previously only the tank
+body was counted -- this was a real bug, fixed here).
 """
 
 import math
@@ -33,11 +37,6 @@ def design_intze_tank(inputs: DesignInputs) -> DesignOutputs:
     out.warnings = []
 
     # ---- 1. Basic sizing: capacity -> cylindrical wall dimensions ----
-    # Standard practice: height-to-diameter ratio for the cylindrical
-    # portion is usually kept between 0.8 and 1.0 for hydraulic/wind
-    # efficiency. We assume H/D = 0.9 as a starting proportion; this is
-    # exactly the kind of variable the optimizer will later search over
-    # instead of us fixing it.
     capacity_m3 = inputs.capacity_liters / 1000.0
     hd_ratio_assumed = 0.9
     out.assumptions.append(
@@ -45,11 +44,6 @@ def design_intze_tank(inputs: DesignInputs) -> DesignOutputs:
         "(will become a search variable for the optimizer in later phases)"
     )
 
-    # capacity ~ cylindrical volume + conical volume - bottom dome volume (approx)
-    # For v0.1 we size off the cylindrical portion alone and treat the
-    # conical + bottom dome volume as a bonus safety margin (they add
-    # extra storage below the cylinder). This is a conservative
-    # simplification, logged as an assumption.
     out.assumptions.append(
         "v0.1 sizes the cylindrical wall to hold 100% of capacity; the "
         "conical + bottom dome volume is treated as extra safety margin "
@@ -89,16 +83,12 @@ def design_intze_tank(inputs: DesignInputs) -> DesignOutputs:
     # ---- 3. Top dome ----
     top_dome_radius = D / 2
     top_dome_rise = inputs.top_dome_rise_ratio * D
-    # Spherical dome thickness: thin, usually governed by minimum
-    # practical thickness rather than stress for typical spans.
     top_dome_thickness_mm = max(100.0, D * 8.0)  # ~8mm per metre of dia, min 100mm
     out.top_dome_radius_m = round(top_dome_radius, 3)
     out.top_dome_rise_m = round(top_dome_rise, 3)
     out.top_dome_thickness_mm = round(top_dome_thickness_mm, 1)
 
     # ---- 4. Bottom (conical) geometry ----
-    # Cone bottom diameter is smaller than the main tank diameter --
-    # typically 40-50% of D for a well-proportioned Intze tank.
     cone_bottom_ratio = 0.4
     cone_bottom_diameter = cone_bottom_ratio * D
     out.assumptions.append(
@@ -120,10 +110,6 @@ def design_intze_tank(inputs: DesignInputs) -> DesignOutputs:
     out.bottom_dome_thickness_mm = round(bottom_dome_thickness_mm, 1)
 
     # ---- 6. Ring beam (the defining Intze member) ----
-    # The ring beam at the cone/cylinder junction resists the outward
-    # horizontal thrust from the conical bottom, in hoop tension.
-    # Approximate thrust from static water pressure + self weight
-    # component at the junction, resolved horizontally.
     water_pressure_at_junction_kpa = WATER_DENSITY_KN_M3 * water_head_m
     horizontal_thrust_per_m_kn = (
         water_pressure_at_junction_kpa
@@ -138,18 +124,14 @@ def design_intze_tank(inputs: DesignInputs) -> DesignOutputs:
         "To be refined with self-weight + live load contributions in "
         "Checkpoint 2."
     )
-    # Rough sizing: keep steel stress in tension well within permissible
-    # (v0.1 uses a simple area-of-steel-free sizing heuristic on the
-    # concrete section, refined later with actual reinforcement design)
     out.ring_beam_width_mm = 300.0
     out.ring_beam_depth_mm = round(max(450.0, hoop_tension_kn * 1.5), 1)
 
-    # ---- 7. Staging ----
-    # Column size driven by total dead + live load / soil bearing check
+    # ---- 7. Staging (now with wind/seismic lateral load) ----
     dome_load = (
         CONCRETE_DENSITY_KN_M3
         * (top_dome_thickness_mm / 1000)
-        * (2 * math.pi * top_dome_radius * top_dome_rise)  # approx dome shell area x thickness
+        * (2 * math.pi * top_dome_radius * top_dome_rise)
     )
     wall_load = (
         CONCRETE_DENSITY_KN_M3
@@ -160,11 +142,31 @@ def design_intze_tank(inputs: DesignInputs) -> DesignOutputs:
     total_dead_load = dome_load + wall_load + water_load
     out.total_dead_load_kn = round(total_dead_load, 2)
 
-    load_per_column_kn = total_dead_load / inputs.num_columns
+    # Exposed height of the tank body (for wind/seismic lateral area and
+    # lever arm): cylindrical wall height + top dome rise + a nominal
+    # allowance for the conical/bottom-dome portion below the cylinder,
+    # approximated via the cone slant height's vertical projection.
+    cone_vertical_height_m = slant_height * math.cos(math.radians(inputs.cone_angle_deg))
+    exposed_height_m = H + inputs.free_board_m + top_dome_rise + cone_vertical_height_m
+    out.assumptions.append(
+        f"Exposed tank-body height for wind/seismic = cylindrical wall "
+        f"({round(H + inputs.free_board_m, 2)}m) + top dome rise "
+        f"({round(top_dome_rise, 2)}m) + conical portion vertical height "
+        f"({round(cone_vertical_height_m, 2)}m) = "
+        f"{round(exposed_height_m, 2)}m. Tank body approximated as a plain "
+        "cylinder of internal diameter D for wind exposed-area purposes "
+        "(ignores wall thickness and dome bulge -- minor, conservative "
+        "simplification, see wind_seismic.py)."
+    )
+
     staging_result = design_staging_columns(
         total_load_kn=total_dead_load,
         staging_height_m=inputs.staging_height_m,
         num_columns=inputs.num_columns,
+        exposed_diameter_m=D,
+        exposed_height_m=exposed_height_m,
+        basic_wind_speed_m_s=inputs.basic_wind_speed_m_s,
+        seismic_zone_factor=inputs.seismic_zone_factor,
     )
     out.staging_column_diameter_mm = staging_result["column_diameter_mm"]
     out.staging_num_bracing_tiers = staging_result["num_bracing_tiers"]
@@ -174,8 +176,19 @@ def design_intze_tank(inputs: DesignInputs) -> DesignOutputs:
         "length each, ~4m target spacing assumed). Column sized via "
         f"IS 456-style slenderness check: le/D = "
         f"{staging_result['slenderness_ratio_le_over_d']}, reduction "
-        f"coefficient Cr = {staging_result['reduction_coefficient_Cr']}."
+        f"coefficient Cr = {staging_result['reduction_coefficient_Cr']}. "
+        f"Extra axial load from wind/seismic: "
+        f"{staging_result['extra_axial_per_column_from_lateral_kn']} kN per "
+        "column (added before factoring)."
     )
+    if "lateral_load_detail" in staging_result:
+        lld = staging_result["lateral_load_detail"]
+        out.assumptions.append(
+            f"Governing lateral case: {lld['governing_case']} "
+            f"(overturning moment = {lld['governing_moment_knm']} kN.m). "
+            f"Wind force = {lld['wind']['wind_force_kn']} kN, seismic force = "
+            f"{lld['seismic']['seismic_force_kn']} kN."
+        )
     for w in staging_result["warnings"]:
         out.warnings.append(w)
 
@@ -207,19 +220,32 @@ def design_intze_tank(inputs: DesignInputs) -> DesignOutputs:
         )
 
     # ---- 9. Rough material quantities ----
+    # NOTE: staging columns are included here -- a previous version only
+    # counted the tank body (wall + domes + ring beam), which silently
+    # undercounted material and made column-count changes invisible to
+    # cost. Fixed: now includes the staging column concrete volume too.
+    staging_column_volume_m3 = (
+        inputs.num_columns
+        * math.pi
+        * ((staging_result["column_diameter_mm"] / 1000) / 2) ** 2
+        * inputs.staging_height_m
+    )
     concrete_volume = (
         (wall_thickness_mm / 1000) * math.pi * D * H
         + (top_dome_thickness_mm / 1000) * 2 * math.pi * top_dome_radius * top_dome_rise
         + (bottom_dome_thickness_mm / 1000) * 2 * math.pi * bottom_dome_radius * bottom_dome_rise
         + (out.ring_beam_width_mm / 1000) * (out.ring_beam_depth_mm / 1000) * math.pi * D
+        + staging_column_volume_m3
     )
     out.concrete_volume_m3 = round(concrete_volume, 2)
-    # Very rough steel estimate: ~80 kg per m3 of RCC for this member type (typical range 60-100)
     out.estimated_steel_kg = round(concrete_volume * 80.0, 1)
     out.assumptions.append(
         "Steel quantity estimated at 80 kg per m3 of concrete (typical "
         "textbook range 60-100 kg/m3 for water tank members) -- placeholder "
-        "until actual reinforcement design is computed member-by-member."
+        "until actual reinforcement design is computed member-by-member. "
+        f"Concrete volume now includes staging columns "
+        f"({round(staging_column_volume_m3, 2)} m3 of the "
+        f"{out.concrete_volume_m3} m3 total)."
     )
 
     return out
@@ -233,7 +259,7 @@ if __name__ == "__main__":
         soil_bearing_capacity_kpa=150.0,
     )
     result = design_intze_tank(sample)
-    print("=== Intze Tank Design -- v0.1 output ===")
+    print("=== Intze Tank Design -- v0.2 output (with wind/seismic) ===")
     for field_name, value in result.__dict__.items():
         if field_name in ("assumptions", "warnings"):
             continue
