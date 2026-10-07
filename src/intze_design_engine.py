@@ -170,6 +170,9 @@ def design_intze_tank(inputs: DesignInputs) -> DesignOutputs:
     )
     out.staging_column_diameter_mm = staging_result["column_diameter_mm"]
     out.staging_num_bracing_tiers = staging_result["num_bracing_tiers"]
+    out.staging_extra_axial_per_column_kn = staging_result["extra_axial_per_column_from_lateral_kn"]
+    if "lateral_load_detail" in staging_result:
+        out.governing_lateral_case = staging_result["lateral_load_detail"]["governing_case"]
     out.assumptions.append(
         f"Staging split into {staging_result['num_bracing_tiers']} bracing "
         f"tiers ({staging_result['unsupported_length_per_tier_m']}m unsupported "

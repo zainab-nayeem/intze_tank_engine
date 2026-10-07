@@ -78,6 +78,8 @@ class DesignOutputs:
     foundation_type: str = None
     foundation_size_m: float = None
     total_dead_load_kn: float = None
+    staging_extra_axial_per_column_kn: float = None
+    governing_lateral_case: str = None
     concrete_volume_m3: float = None
     estimated_steel_kg: float = None
     warnings: list = field(default_factory=list)

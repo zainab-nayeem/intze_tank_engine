@@ -24,7 +24,9 @@ CAPACITY_RANGE_L = (50_000, 2_000_000)       # 50k to 20 lakh litres
 STAGING_HEIGHT_RANGE_M = (8.0, 24.0)         # 8m to 24m
 NUM_COLUMNS_OPTIONS = [6, 8, 10, 12]
 SOIL_BEARING_RANGE_KPA = (80.0, 250.0)
-CONCRETE_GRADE_OPTIONS = [20, 25, 30]
+CONCRETE_GRADE_OPTIONS = [20, 25, 30, 35, 40]
+WIND_SPEED_RANGE_M_S = (33.0, 55.0)           # IS 875 basic wind speed zones
+SEISMIC_ZONE_FACTORS = [0.10, 0.16, 0.24, 0.36]  # IS 1893 Zones II-V
 
 RANDOM_SEED = 42   # fixed seed -- makes the dataset reproducible, an
                     # important detail for academic integrity (anyone
@@ -38,6 +40,8 @@ def sample_inputs() -> DesignInputs:
         num_columns=random.choice(NUM_COLUMNS_OPTIONS),
         soil_bearing_capacity_kpa=random.uniform(*SOIL_BEARING_RANGE_KPA),
         concrete_grade_mpa=float(random.choice(CONCRETE_GRADE_OPTIONS)),
+        basic_wind_speed_m_s=random.uniform(*WIND_SPEED_RANGE_M_S),
+        seismic_zone_factor=random.choice(SEISMIC_ZONE_FACTORS),
     )
 
 
@@ -62,6 +66,8 @@ def generate_dataset(num_samples: int, output_path: str) -> dict:
             "num_columns": inputs.num_columns,
             "soil_bearing_capacity_kpa": round(inputs.soil_bearing_capacity_kpa, 1),
             "concrete_grade_mpa": inputs.concrete_grade_mpa,
+            "basic_wind_speed_m_s": round(inputs.basic_wind_speed_m_s, 1),
+            "seismic_zone_factor": inputs.seismic_zone_factor,
             # outputs
             "internal_diameter_m": outputs.internal_diameter_m,
             "cylindrical_wall_height_m": outputs.cylindrical_wall_height_m,
@@ -77,6 +83,8 @@ def generate_dataset(num_samples: int, output_path: str) -> dict:
             "foundation_type": outputs.foundation_type,
             "foundation_size_m": outputs.foundation_size_m,
             "total_dead_load_kn": outputs.total_dead_load_kn,
+            "staging_extra_axial_per_column_kn": outputs.staging_extra_axial_per_column_kn,
+            "governing_lateral_case": outputs.governing_lateral_case,
             "concrete_volume_m3": outputs.concrete_volume_m3,
             "estimated_steel_kg": outputs.estimated_steel_kg,
             # derived flags -- useful signals for the ML model later
@@ -100,7 +108,7 @@ def generate_dataset(num_samples: int, output_path: str) -> dict:
 
 
 if __name__ == "__main__":
-    result = generate_dataset(num_samples=3000, output_path="intze_dataset.csv")
+    result = generate_dataset(num_samples=8000, output_path="intze_dataset.csv")
     print("=== Dataset Generation Complete ===")
     for k, v in result.items():
         print(f"{k}: {v}")

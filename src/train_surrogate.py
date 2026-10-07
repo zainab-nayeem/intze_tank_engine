@@ -29,12 +29,15 @@ INPUT_FEATURES = [
     "num_columns",
     "soil_bearing_capacity_kpa",
     "concrete_grade_mpa",
+    "basic_wind_speed_m_s",
+    "seismic_zone_factor",
 ]
 
 TARGETS = [
     "cylindrical_wall_thickness_mm",
     "staging_column_diameter_mm",
     "concrete_volume_m3",
+    "staging_extra_axial_per_column_kn",
 ]
 
 
@@ -55,7 +58,7 @@ def train_and_evaluate(dataset_path: str, model_output_prefix: str = "surrogate"
         # definitely have -- e.g. hoop tension scales with diameter AND
         # height together), and needs no feature scaling.
         model = RandomForestRegressor(
-            n_estimators=50, max_depth=8, random_state=42, n_jobs=-1
+            n_estimators=200, max_depth=None, min_samples_leaf=2, random_state=42, n_jobs=-1
         )
         model.fit(X_train, y_train)
 
