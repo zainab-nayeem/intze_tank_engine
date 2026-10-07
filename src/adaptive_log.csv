@@ -1,0 +1,7 @@
+month,event,staging_height_m,seismic_zone_factor,feasible_designs,pick,pick_cost,pick_lateral_kn,unrestricted_best,unrestricted_cost,unrestricted_lateral_kn,price_cost_pct,price_lateral_pct
+0,Baseline design (original site data),16.0,0.16,8,12 columns M20,171.33,664.88,12 columns M20,171.33,664.88,0.0,0.0
+1,Foundation team has already cast 10 column footings,16.0,0.16,3,10 columns M20,165.33,797.85,12 columns M20,171.33,664.88,-3.5,20.0
+2,Cement supplier can no longer deliver M35 / M40,16.0,0.16,3,10 columns M20,165.33,797.85,12 columns M20,171.33,664.88,-3.5,20.0
+3,Revised hydraulic design raises staging from 16 m to 20 m,20.0,0.16,3,10 columns M25,196.24,918.11,12 columns M20,193.19,784.87,1.58,16.98
+4,Site re-classified to Seismic Zone V (zone factor 0.36),20.0,0.36,2,10 columns M20,246.05,2119.15,8 columns M20,240.06,2648.93,2.5,-20.0
+5,Client imposes a relative-cost cap of 243,20.0,0.36,0,INFEASIBLE,,,,,,,
