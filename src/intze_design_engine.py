@@ -38,10 +38,11 @@ def design_intze_tank(inputs: DesignInputs) -> DesignOutputs:
 
     # ---- 1. Basic sizing: capacity -> cylindrical wall dimensions ----
     capacity_m3 = inputs.capacity_liters / 1000.0
-    hd_ratio_assumed = 0.9
+    hd_ratio_assumed = inputs.hd_ratio
     out.assumptions.append(
-        f"Cylindrical wall height/diameter ratio assumed = {hd_ratio_assumed} "
-        "(will become a search variable for the optimizer in later phases)"
+        f"Cylindrical wall height/diameter ratio = {hd_ratio_assumed} "
+        "(default 0.9; published studies report lower ratios, about 0.2-0.4, "
+        "as cost-optimal for 400-1200 kL tanks -- see validation report)"
     )
 
     out.assumptions.append(
@@ -146,7 +147,7 @@ def design_intze_tank(inputs: DesignInputs) -> DesignOutputs:
     # lever arm): cylindrical wall height + top dome rise + a nominal
     # allowance for the conical/bottom-dome portion below the cylinder,
     # approximated via the cone slant height's vertical projection.
-    cone_vertical_height_m = slant_height * math.cos(math.radians(inputs.cone_angle_deg))
+    cone_vertical_height_m = slant_height * math.sin(math.radians(inputs.cone_angle_deg))  # angle is measured from horizontal
     exposed_height_m = H + inputs.free_board_m + top_dome_rise + cone_vertical_height_m
     out.assumptions.append(
         f"Exposed tank-body height for wind/seismic = cylindrical wall "

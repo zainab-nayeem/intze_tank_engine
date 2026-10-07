@@ -53,6 +53,7 @@ class DesignInputs:
     location: SiteLocation = None
     basic_wind_speed_m_s: float = 44.0   # IS 875 basic wind speed, site-dependent
     seismic_zone_factor: float = 0.16    # IS 1893 zone factor (Zone III default)
+    hd_ratio: float = 0.9                # cylindrical wall height / diameter (was fixed at 0.9)
 
 
 @dataclass
