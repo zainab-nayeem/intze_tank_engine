@@ -1,0 +1,7 @@
+name,lat,lon,population,area_km2,density_per_km2,polygon,soil_bearing_kpa,wind_speed_m_s,seismic_zone_factor,growth_rate_pct,lpcd
+DEMO Zone A,26.7200,88.4300,18000,,,,150,47,0.24,1.5,135
+DEMO Zone B,26.7290,88.4380,12000,,,,120,47,0.24,1.5,135
+DEMO Zone C,26.7120,88.4420,,1.8,6500,,180,47,0.24,2.0,135
+DEMO Zone D,26.7350,88.4250,6000,,,,90,47,0.24,1.0,100
+DEMO Zone E,,,,,5500,26.7050 88.4200;26.7050 88.4300;26.7110 88.4300;26.7110 88.4200,200,47,0.24,1.5,135
+DEMO Zone F,26.7400,88.4500,9500,,,,110,47,0.24,1.5,135
