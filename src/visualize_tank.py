@@ -166,7 +166,7 @@ def make_figure(site, candidates):
             basic_wind_speed_m_s=site["wind_speed_m_s"], seismic_zone_factor=site["seismic_zone_factor"],
         )
         out = design_intze_tank(inputs)
-        cost = total_relative_cost(out.concrete_volume_m3, c["concrete_grade_mpa"], c["num_columns"])
+        cost = total_relative_cost(out.concrete_volume_m3, c["concrete_grade_mpa"], c["num_columns"], out.estimated_steel_kg)
         tr = build_design_traces(inputs, out)
         all_traces.append(tr)
         counts.append(len(tr))

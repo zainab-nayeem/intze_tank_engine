@@ -53,8 +53,8 @@ TIMELINE = [
          changes={"staging_height_m": 20.0}),
     dict(month=4, label="Site re-classified to Seismic Zone V (zone factor 0.36)",
          changes={"seismic_zone_factor": 0.36}),
-    dict(month=5, label="Client imposes a relative-cost cap of 310",
-         changes={"max_cost": 310.0}),
+    dict(month=5, label="Client imposes a relative-cost cap of 635",
+         changes={"max_cost": 635.0}),
 ]
 
 
@@ -67,7 +67,7 @@ def _real(candidate, site):
     )
     out = design_intze_tank(inputs)
     cost = total_relative_cost(out.concrete_volume_m3, candidate["concrete_grade_mpa"],
-                               candidate["num_columns"])
+                               candidate["num_columns"], out.estimated_steel_kg)
     return {
         "num_columns": candidate["num_columns"],
         "grade": candidate["concrete_grade_mpa"],

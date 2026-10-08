@@ -48,11 +48,20 @@ GRADE_COST_FACTOR = {
 PER_COLUMN_OVERHEAD_RELATIVE = 3.0
 
 
+# Reinforcement steel price in the same relative units (1.0 = one m3 of M20
+# concrete). Illustrative: roughly Rs 65-75 per kg of steel against roughly
+# Rs 6,500-7,500 per m3 of M20 concrete, i.e. 1 kg steel ~ 0.01 m3 concrete.
+# Replace with current local rates before real use.
+STEEL_COST_PER_KG_RELATIVE = 0.01
+
+
 def total_relative_cost(concrete_volume_m3: float, concrete_grade_mpa: float,
-                         num_columns: int = None) -> float:
+                         num_columns: int = None, steel_kg: float = None) -> float:
     grade_key = int(concrete_grade_mpa)
     factor = GRADE_COST_FACTOR.get(grade_key, 1.0)
     cost = concrete_volume_m3 * factor
+    if steel_kg is not None:
+        cost += steel_kg * STEEL_COST_PER_KG_RELATIVE
     if num_columns is not None:
         cost += num_columns * PER_COLUMN_OVERHEAD_RELATIVE
     return cost

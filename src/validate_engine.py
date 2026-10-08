@@ -143,7 +143,7 @@ def C_literature():
         for hd in [0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]:
             o = design_intze_tank(DesignInputs(capacity_liters=cap * 1000, staging_height_m=16, num_columns=12,
                                                concrete_grade_mpa=25.0, hd_ratio=hd))
-            rows.append((hd, total_relative_cost(o.concrete_volume_m3, 25, 12)))
+            rows.append((hd, total_relative_cost(o.concrete_volume_m3, 25, 12, o.estimated_steel_kg)))
         best = min(rows, key=lambda r: r[1])
         c09 = dict(rows)[0.9]
         print(f"  {cap:>6} kL | {best[0]:>8} | {c09:>11.0f} | {best[1]:>12.0f} | {100*(c09-best[1])/c09:>5.0f}% | {paper[cap]}")

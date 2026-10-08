@@ -126,7 +126,7 @@ def design_tank(capacity_kl, staging_m, soil, wind, seismic):
                 soil_bearing_capacity_kpa=soil, concrete_grade_mpa=float(g),
                 basic_wind_speed_m_s=wind, seismic_zone_factor=seismic, hd_ratio=HD_RATIO))
             cands.append({"n": n, "grade": g,
-                          "cost": total_relative_cost(o.concrete_volume_m3, g, n),
+                          "cost": total_relative_cost(o.concrete_volume_m3, g, n, o.estimated_steel_kg),
                           "axial": o.staging_extra_axial_per_column_kn,
                           "col_dia": o.staging_column_diameter_mm, "foundation": o.foundation_type,
                           "diameter": o.internal_diameter_m, "volume": o.concrete_volume_m3,

@@ -37,6 +37,7 @@ TARGETS = [
     "cylindrical_wall_thickness_mm",
     "staging_column_diameter_mm",
     "concrete_volume_m3",
+    "estimated_steel_kg",
     "staging_extra_axial_per_column_kn",
 ]
 

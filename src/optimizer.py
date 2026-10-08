@@ -8,8 +8,8 @@ designer. The genuine design choices are: how many staging columns and
 what concrete grade.
 
 Objectives (both minimized):
-  1. total_relative_cost -- concrete volume x grade cost factor, plus a
-     per-column construction overhead (see cost_model.py)
+  1. total_relative_cost -- concrete volume x grade cost factor, plus steel
+     and a per-column construction overhead (see cost_model.py)
   2. extra_axial_per_column_kn -- extra compression each column must
      carry from wind/seismic overturning (lower = more structural
      margin against lateral load)
@@ -38,7 +38,7 @@ CONCRETE_GRADE_OPTIONS = [20, 25, 30, 35, 40]
 
 
 class TankDesignProblem(Problem):
-    def __init__(self, site, volume_model, axial_model,
+    def __init__(self, site, volume_model, axial_model, steel_model=None,
                  column_options=None, grade_options=None):
         self.column_options = list(column_options or NUM_COLUMNS_OPTIONS)
         self.grade_options = list(grade_options or CONCRETE_GRADE_OPTIONS)
@@ -51,6 +51,7 @@ class TankDesignProblem(Problem):
         self.site = site
         self.volume_model = volume_model
         self.axial_model = axial_model
+        self.steel_model = steel_model
 
     def _evaluate(self, X, out, *args, **kwargs):
         n = X.shape[0]
@@ -74,7 +75,8 @@ class TankDesignProblem(Problem):
                 "seismic_zone_factor": self.site["seismic_zone_factor"],
             }])
             volume = self.volume_model.predict(features)[0]
-            f1[i] = total_relative_cost(volume, grade, num_columns)
+            steel = self.steel_model.predict(features)[0] if self.steel_model is not None else None
+            f1[i] = total_relative_cost(volume, grade, num_columns, steel)
             f2[i] = self.axial_model.predict(features)[0]
             self._cache[(num_columns, grade)] = (f1[i], f2[i])
         out["F"] = np.column_stack([f1, f2])
@@ -88,7 +90,8 @@ def run_optimization(site, pop_size=20, n_gen=30,
     grade_options = list(grade_options or CONCRETE_GRADE_OPTIONS)
     volume_model = joblib.load("surrogate_concrete_volume_m3.joblib")
     axial_model = joblib.load("surrogate_staging_extra_axial_per_column_kn.joblib")
-    problem = TankDesignProblem(site, volume_model, axial_model,
+    steel_model = joblib.load("surrogate_estimated_steel_kg.joblib")
+    problem = TankDesignProblem(site, volume_model, axial_model, steel_model,
                                 column_options, grade_options)
 
     # If a choice is locked to a single value (e.g. columns already cast),
@@ -153,7 +156,7 @@ def verify_against_real_engine(candidate, site):
     return {
         "real_cost": round(total_relative_cost(
             real.concrete_volume_m3, candidate["concrete_grade_mpa"],
-            candidate["num_columns"]), 2),
+            candidate["num_columns"], real.estimated_steel_kg), 2),
         "real_extra_axial_kn": real.staging_extra_axial_per_column_kn,
         "real_column_dia_mm": real.staging_column_diameter_mm,
     }
