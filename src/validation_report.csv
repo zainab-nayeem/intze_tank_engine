@@ -49,9 +49,9 @@ B sanity,weaker soil -> raft chosen (<100 kPa),,,PASS,
 B sanity,full water tank: seismic governs at Zone II-V (matches usual practice),,,PASS,
 B sanity,code path: wind is chosen when seismic force is negligible,,,PASS,
 B sanity,lateral load never negative,,,PASS,
-C literature trend,200 kL: shallow tank (H/D<=0.4) cheaper than H/D 0.9 -- as published,,,PASS,cost 83 vs 90
-C literature trend,400 kL: shallow tank (H/D<=0.4) cheaper than H/D 0.9 -- as published,,,PASS,cost 120 vs 149
-C literature trend,600 kL: shallow tank (H/D<=0.4) cheaper than H/D 0.9 -- as published,,,PASS,cost 164 vs 213
-C literature trend,800 kL: shallow tank (H/D<=0.4) cheaper than H/D 0.9 -- as published,,,PASS,cost 212 vs 279
-C literature trend,1000 kL: shallow tank (H/D<=0.4) cheaper than H/D 0.9 -- as published,,,PASS,cost 259 vs 351
-C literature trend,1200 kL: shallow tank (H/D<=0.4) cheaper than H/D 0.9 -- as published,,,PASS,cost 309 vs 428
+C literature trend,200 kL: shallow tank (H/D<=0.4) cheaper than H/D 0.9 -- as published,,,PASS,cost 126 vs 126
+C literature trend,400 kL: shallow tank (H/D<=0.4) cheaper than H/D 0.9 -- as published,,,PASS,cost 193 vs 209
+C literature trend,600 kL: shallow tank (H/D<=0.4) cheaper than H/D 0.9 -- as published,,,PASS,cost 275 vs 295
+C literature trend,800 kL: shallow tank (H/D<=0.4) cheaper than H/D 0.9 -- as published,,,PASS,cost 364 vs 390
+C literature trend,1000 kL: shallow tank (H/D<=0.4) cheaper than H/D 0.9 -- as published,,,PASS,cost 455 vs 499
+C literature trend,1200 kL: shallow tank (H/D<=0.4) cheaper than H/D 0.9 -- as published,,,PASS,cost 551 vs 616

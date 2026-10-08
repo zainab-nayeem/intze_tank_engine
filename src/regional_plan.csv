@@ -1,6 +1,7 @@
 tank,capacity_kl,lat,lon,serves,staging_m,columns,grade_M,column_dia_mm,foundation,lateral_kn_per_column,concrete_m3,relative_cost
-1,1500,26.72,88.43,DEMO Zone A,12,12,20,1125,raft,2142,451.8,487.8
-2,1250,26.73045,88.43485,DEMO Zone B; DEMO Zone D,14,12,20,1055,raft,1995,390.2,426.2
-3,1000,26.712,88.442,DEMO Zone C,12,12,20,922,raft,1491,280.3,316.3
-4,300,26.708,88.425,DEMO Zone E,12,10,20,570,isolated_footings,635,70.8,100.8
-5,750,26.74,88.45,DEMO Zone F,12,12,20,802,raft,1159,200.6,236.6
+1,1500,26.72,88.43,DEMO Zone A,12,12,20,1125,raft,2142,677.8,713.8
+2,1000,26.729,88.438,DEMO Zone B,12,12,20,922,raft,1491,441.5,477.5
+3,1000,26.712,88.442,DEMO Zone C,12,12,20,922,raft,1491,390.9,426.9
+4,300,26.735,88.425,DEMO Zone D,12,12,20,520,raft,529,121.9,157.9
+5,300,26.708,88.425,DEMO Zone E,12,10,20,570,isolated_footings,635,101.4,131.4
+6,750,26.74,88.45,DEMO Zone F,12,12,20,802,raft,1159,319.1,355.1

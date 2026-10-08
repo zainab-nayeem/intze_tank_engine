@@ -83,5 +83,8 @@ class DesignOutputs:
     governing_lateral_case: str = None
     concrete_volume_m3: float = None
     estimated_steel_kg: float = None
+    cone_volume_m3: float = None
+    foundation_volume_m3: float = None
+    bracing_volume_m3: float = None
     warnings: list = field(default_factory=list)
     assumptions: list = field(default_factory=list)

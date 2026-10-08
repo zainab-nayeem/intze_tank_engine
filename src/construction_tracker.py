@@ -48,7 +48,7 @@ STAGE_WEIGHTS = {
     "wall": 0.20, "top_dome": 0.10, "finishing": 0.10,
 }
 # Stages that cast concrete we can quantify from the engine.
-CONCRETE_STAGES = ["staging", "container_bottom", "wall", "top_dome"]
+CONCRETE_STAGES = ["foundation", "staging", "container_bottom", "wall", "top_dome"]
 
 DEFAULT_SITE = {
     "capacity_liters": 500_000, "staging_height_m": 16.0, "soil_bearing_kpa": 150.0,
@@ -72,12 +72,14 @@ def stage_volumes(inputs, out):
     D = out.internal_diameter_m
     H = out.cylindrical_wall_height_m - inputs.free_board_m
     vol = {
+        "foundation": out.foundation_volume_m3,
         "staging": inputs.num_columns * math.pi * (out.staging_column_diameter_mm / 2000) ** 2
-                   * inputs.staging_height_m,
+                   * inputs.staging_height_m + out.bracing_volume_m3,
         "container_bottom":
             (out.bottom_dome_thickness_mm / 1000) * 2 * math.pi * out.bottom_dome_radius_m
             * out.bottom_dome_rise_m
-            + (out.ring_beam_width_mm / 1000) * (out.ring_beam_depth_mm / 1000) * math.pi * D,
+            + (out.ring_beam_width_mm / 1000) * (out.ring_beam_depth_mm / 1000) * math.pi * D
+            + out.cone_volume_m3,
         "wall": (out.cylindrical_wall_thickness_mm / 1000) * math.pi * D * H,
         "top_dome": (out.top_dome_thickness_mm / 1000) * 2 * math.pi * out.top_dome_radius_m
                     * out.top_dome_rise_m,

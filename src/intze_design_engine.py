@@ -234,22 +234,71 @@ def design_intze_tank(inputs: DesignInputs) -> DesignOutputs:
         * ((staging_result["column_diameter_mm"] / 1000) / 2) ** 2
         * inputs.staging_height_m
     )
-    concrete_volume = (
+    # ---- v0.3 completeness fix: members that v0.2 left out ----
+    # (a) Conical bottom shell (frustum lateral area x thickness). Without it
+    #     a very flat, wide tank looked artificially cheap because its large
+    #     cone was free. Thickness rule is a PLACEHOLDER: 300 mm minimum,
+    #     growing 30 mm per metre of diameter (cone stresses scale with size).
+    cone_r_top = D / 2
+    cone_r_bot = cone_bottom_diameter / 2
+    cone_thickness_mm = max(300.0, 30.0 * D)
+    cone_volume_m3 = (
+        (cone_thickness_mm / 1000)
+        * math.pi * (cone_r_top + cone_r_bot) * slant_height
+    )
+    # (b) Foundation concrete (isolated footings or raft slab).
+    if foundation_result["foundation_type"] == "raft":
+        raft_thickness_m = max(0.6, foundation_result["raft_equivalent_diameter_m"] / 15.0)
+        foundation_volume_m3 = foundation_result["raft_area_m2"] * raft_thickness_m
+    else:
+        foundation_volume_m3 = (
+            inputs.num_columns
+            * foundation_result["footing_area_m2"]
+            * (foundation_result["footing_depth_mm"] / 1000)
+        )
+    # (c) Staging bracing beams: one ring beam per tier below the top,
+    #     300 x 500 mm section running round the column pitch circle.
+    n_brace_rings = max(int(staging_result["num_bracing_tiers"]) - 1, 0)
+    bracing_volume_m3 = n_brace_rings * 0.30 * 0.50 * math.pi * D
+
+    tank_body_volume = (
         (wall_thickness_mm / 1000) * math.pi * D * H
         + (top_dome_thickness_mm / 1000) * 2 * math.pi * top_dome_radius * top_dome_rise
         + (bottom_dome_thickness_mm / 1000) * 2 * math.pi * bottom_dome_radius * bottom_dome_rise
         + (out.ring_beam_width_mm / 1000) * (out.ring_beam_depth_mm / 1000) * math.pi * D
-        + staging_column_volume_m3
+    )
+    concrete_volume = (
+        tank_body_volume + cone_volume_m3 + staging_column_volume_m3
+        + bracing_volume_m3 + foundation_volume_m3
     )
     out.concrete_volume_m3 = round(concrete_volume, 2)
-    out.estimated_steel_kg = round(concrete_volume * 80.0, 1)
+    out.cone_volume_m3 = round(cone_volume_m3, 2)
+    out.foundation_volume_m3 = round(foundation_volume_m3, 2)
+    out.bracing_volume_m3 = round(bracing_volume_m3, 2)
+
+    # Steel estimate, member-wise (textbook kg per m3 ranges, PLACEHOLDERS
+    # until real reinforcement design is done member by member).
+    steel_kg = (
+        80.0 * (tank_body_volume + cone_volume_m3)
+        + 150.0 * staging_column_volume_m3
+        + 100.0 * bracing_volume_m3
+        + 60.0 * foundation_volume_m3
+    )
+    out.estimated_steel_kg = round(steel_kg, 1)
     out.assumptions.append(
-        "Steel quantity estimated at 80 kg per m3 of concrete (typical "
-        "textbook range 60-100 kg/m3 for water tank members) -- placeholder "
-        "until actual reinforcement design is computed member-by-member. "
-        f"Concrete volume now includes staging columns "
-        f"({round(staging_column_volume_m3, 2)} m3 of the "
-        f"{out.concrete_volume_m3} m3 total)."
+        f"Concrete volume {out.concrete_volume_m3} m3 = tank body "
+        f"{round(tank_body_volume, 1)} + cone {round(cone_volume_m3, 1)} "
+        f"(thickness {round(cone_thickness_mm)} mm) + staging columns "
+        f"{round(staging_column_volume_m3, 1)} + bracing beams "
+        f"{round(bracing_volume_m3, 1)} + foundation "
+        f"{round(foundation_volume_m3, 1)}. Cone thickness, raft thickness "
+        "and bracing section are placeholder rules, not yet designed members."
+    )
+    out.assumptions.append(
+        "Steel estimated member-wise: 80 kg/m3 tank body and cone, 150 kg/m3 "
+        "columns, 100 kg/m3 bracing, 60 kg/m3 foundation (typical textbook "
+        "ranges) -- placeholder until real reinforcement design. Steel is "
+        "reported but not yet priced in the relative cost model."
     )
 
     return out
