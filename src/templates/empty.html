@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}No project yet · Intze Tank Platform{% endblock %}
+{% block content %}
+<section class="center-page">
+  <h1>No project yet</h1>
+  {% if 'start' in can %}
+  <p class="sub" style="margin:20px auto 32px">Start a project and the optimiser picks a balanced baseline plan for the default site (500 kL, 16 m staging).</p>
+  <form method="post" action="{{ url_for('start_project') }}">
+    <input type="hidden" name="csrf" value="{{ csrf_token() }}">
+    <button class="btn primary" type="submit">Start the project</button>
+  </form>
+  {% else %}
+  <p class="sub" style="margin:20px auto">The Project Manager has not started this project yet. Check back once they have.</p>
+  {% endif %}
+</section>
+{% endblock %}

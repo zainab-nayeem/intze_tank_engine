@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block title %}Site desk · Intze Tank Platform{% endblock %}
+{% block content %}
+<section>
+  <h2>Site desk</h2>
+  <p class="sub">Record what happened on site today. Changes here feed the advice straight away.</p>
+  <div class="grid g2">
+    <form class="card" method="post" action="{{ url_for('post_progress') }}">
+      <input type="hidden" name="csrf" value="{{ csrf_token() }}">
+      <h3 style="margin-bottom:20px">Log progress</h3>
+      <div class="field">
+        <label for="stage">Stage</label>
+        <select id="stage" name="stage">
+          {% for s in weights %}<option value="{{ s }}">{{ STAGE_LABEL[s] }} (now {{ '%.0f'|format(st.progress[s]) }}%)</option>{% endfor %}
+        </select>
+      </div>
+      <div class="field">
+        <label for="percent">Completed so far (%)</label>
+        <input id="percent" name="percent" type="number" min="0" max="100" step="1" required>
+      </div>
+      <button class="btn primary" type="submit">Save progress</button>
+    </form>
+
+    <form class="card" method="post" action="{{ url_for('post_stock') }}">
+      <input type="hidden" name="csrf" value="{{ csrf_token() }}">
+      <h3 style="margin-bottom:20px">Concrete in store</h3>
+      <div class="field">
+        <label for="grade">Grade</label>
+        <select id="grade" name="grade">
+          {% for g in grades %}<option value="{{ g }}">M{{ g }}{% if st.stock_m3.get(g|string) is not none %} (now {{ '%.0f'|format(st.stock_m3[g|string]) }} m³){% endif %}</option>{% endfor %}
+        </select>
+      </div>
+      <div class="field">
+        <label for="m3">Available (m³) — leave empty for unlimited</label>
+        <input id="m3" name="m3" type="number" min="0" step="0.5">
+      </div>
+      <button class="btn primary" type="submit">Save stock</button>
+    </form>
+  </div>
+</section>
+
+<section>
+  <h2>Site data and limits</h2>
+  {% if 'site_data' in can %}
+  <p class="sub">Changing these re-runs the design checks. Staging height cannot change once columns are being cast.</p>
+  <form class="card" method="post" action="{{ url_for('post_site_data') }}">
+    <input type="hidden" name="csrf" value="{{ csrf_token() }}">
+    <div class="row">
+      <div class="field"><label for="staging_height_m">Staging height (m)</label>
+        <input id="staging_height_m" name="staging_height_m" type="number" step="0.5" value="{{ st.site.staging_height_m }}"></div>
+      <div class="field"><label for="seismic_zone_factor">Seismic zone factor</label>
+        <input id="seismic_zone_factor" name="seismic_zone_factor" type="number" step="0.01" value="{{ st.site.seismic_zone_factor }}"></div>
+    </div>
+    <div class="row">
+      <div class="field"><label for="wind_speed_m_s">Basic wind speed (m/s)</label>
+        <input id="wind_speed_m_s" name="wind_speed_m_s" type="number" step="1" value="{{ st.site.wind_speed_m_s }}"></div>
+      <div class="field"><label for="soil_bearing_kpa">Soil bearing (kPa)</label>
+        <input id="soil_bearing_kpa" name="soil_bearing_kpa" type="number" step="5" value="{{ st.site.soil_bearing_kpa }}"></div>
+    </div>
+    <div class="row">
+      <div class="field"><label for="capacity_liters">Capacity (litres)</label>
+        <input id="capacity_liters" name="capacity_liters" type="number" step="1000" value="{{ '%.0f'|format(st.site.capacity_liters) }}"></div>
+      <div class="field"><label for="max_cost">Cost cap — leave empty for none</label>
+        <input id="max_cost" name="max_cost" type="number" step="1" value="{{ st.max_cost if st.max_cost else '' }}"></div>
+    </div>
+    <button class="btn primary" type="submit">Save site data</button>
+  </form>
+  {% else %}
+  <div class="lockbox">
+    <b>Only the Project Manager can change site data and the cost cap.</b>
+    Seismic zone, wind speed, soil and capacity decide the structural design, so a change needs the manager's sign-off. If something on site differs from these values ({{ st.site.seismic_zone_factor }} seismic factor, {{ st.site.wind_speed_m_s }} m/s wind, {{ '%.0f'|format(st.site.soil_bearing_kpa) }} kPa soil), tell the manager.
+  </div>
+  {% endif %}
+</section>
+{% endblock %}

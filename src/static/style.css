@@ -1,0 +1,169 @@
+/* Intze Tank Platform -- dark, thin-type look based on the student's reference.
+   One accent (rose) is used for state and primary actions only. */
+:root {
+  --ink: #0c0c0e;
+  --panel: #141417;
+  --raised: #1b1b20;
+  --line: #2c2c33;
+  --line-soft: #202026;
+  --text: #edebe7;
+  --muted: #9a9aa4;
+  --accent: #e8556d;
+  --accent-soft: rgba(232, 85, 109, .14);
+  --good: #8fd6b4;
+  --warn: #f0b765;
+  --radius: 22px;
+  --display: "Outfit", "Segoe UI", system-ui, sans-serif;
+  --serif: "Instrument Serif", "Georgia", serif;
+}
+
+* { box-sizing: border-box; }
+html { color-scheme: dark; }
+body {
+  margin: 0;
+  background: var(--ink);
+  color: var(--text);
+  font-family: var(--display);
+  font-weight: 300;
+  font-size: 17px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+a { color: inherit; }
+button, input, select { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 6px; }
+
+/* ---------- top bar ---------- */
+.bar {
+  display: flex; align-items: center; justify-content: space-between; gap: 24px;
+  padding: 22px clamp(20px, 4vw, 56px);
+  border-bottom: 1px solid var(--line-soft);
+}
+.brand { font-weight: 400; letter-spacing: .02em; text-decoration: none; font-size: 18px; }
+.brand span { font-family: var(--serif); font-style: italic; font-size: 22px; color: var(--muted); margin-left: 6px; }
+.nav { display: flex; gap: clamp(14px, 3vw, 40px); }
+.nav a {
+  text-decoration: none; font-size: 13px; letter-spacing: .14em; text-transform: uppercase;
+  color: var(--muted); padding: 6px 2px; border-bottom: 1px solid transparent;
+}
+.nav a:hover { color: var(--text); }
+.nav a[aria-current="page"] { color: var(--text); border-bottom-color: var(--accent); }
+.who { display: flex; align-items: center; gap: 14px; font-size: 14px; color: var(--muted); }
+.who b { font-weight: 400; color: var(--text); }
+.who form { margin: 0; }
+
+/* ---------- layout ---------- */
+.wrap { max-width: 1240px; margin: 0 auto; padding: clamp(28px, 5vw, 72px) clamp(20px, 4vw, 56px) 96px; }
+h1, h2, h3 { font-weight: 200; margin: 0; letter-spacing: .01em; line-height: 1.05; }
+h2 { font-size: clamp(30px, 4vw, 46px); margin-bottom: 8px; }
+h3 { font-size: 22px; font-weight: 300; line-height: 1.25; }
+.sub { color: var(--muted); max-width: 62ch; margin: 0 0 32px; }
+section + section { margin-top: clamp(48px, 7vw, 96px); }
+
+.card {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: linear-gradient(180deg, #17171b 0%, #101013 100%);
+  padding: 28px;
+}
+.grid { display: grid; gap: 16px; }
+.g3 { grid-template-columns: repeat(3, 1fr); }
+.g2 { grid-template-columns: repeat(2, 1fr); }
+@media (max-width: 880px) { .g3, .g2 { grid-template-columns: 1fr; } .nav { display: none; } }
+
+/* ---------- hero (overview) ---------- */
+.hero { display: grid; grid-template-columns: 1.3fr 1fr; gap: 32px; align-items: center; }
+@media (max-width: 880px) { .hero { grid-template-columns: 1fr; } }
+.big {
+  font-size: clamp(88px, 15vw, 210px); font-weight: 100; line-height: .9; letter-spacing: -.02em;
+}
+.big small { font-size: .32em; font-weight: 200; letter-spacing: 0; }
+.accent-serif { font-family: var(--serif); font-style: italic; font-weight: 400; color: var(--muted); font-size: clamp(30px, 4vw, 52px); margin-left: 10px; }
+.ring { width: min(100%, 300px); justify-self: end; }
+.ring circle { fill: none; stroke-width: 3; }
+.ring .track { stroke: var(--line); }
+.ring .fill { stroke: var(--accent); stroke-linecap: round; transform: rotate(-90deg); transform-origin: 50% 50%;
+  animation: draw 1.4s cubic-bezier(.2,.7,.2,1) both; }
+@keyframes draw { from { stroke-dashoffset: var(--len); } }
+@media (prefers-reduced-motion: reduce) { .ring .fill { animation: none; } }
+.ring text { fill: var(--muted); font-family: var(--display); font-size: 9px; font-weight: 300; }
+
+/* ---------- stage cards ---------- */
+.stage { display: flex; flex-direction: column; gap: 14px; min-height: 150px; }
+.stage .top { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+.stage .pct { font-size: 38px; font-weight: 200; }
+.meter { height: 2px; background: var(--line); border-radius: 2px; overflow: hidden; margin-top: auto; }
+.meter i { display: block; height: 100%; background: var(--accent); }
+.tag { font-size: 13px; color: var(--muted); border: 1px solid var(--line); border-radius: 99px; padding: 2px 10px; white-space: nowrap; }
+.tag.locked { color: var(--warn); border-color: rgba(240,183,101,.4); }
+
+/* ---------- facts ---------- */
+.facts { display: grid; grid-template-columns: repeat(2, 1fr); gap: 22px 28px; margin: 18px 0 0; }
+.facts dt { color: var(--muted); font-size: 14px; }
+.facts dd { margin: 0; font-size: 26px; font-weight: 200; }
+
+/* ---------- log ---------- */
+.log { list-style: none; margin: 0; padding: 0; }
+.log li { display: grid; grid-template-columns: 150px 1fr; gap: 16px; padding: 14px 0; border-bottom: 1px solid var(--line-soft); }
+.log li:last-child { border-bottom: 0; }
+.log time { color: var(--muted); font-size: 14px; }
+@media (max-width: 640px) { .log li { grid-template-columns: 1fr; gap: 2px; } }
+
+/* ---------- forms ---------- */
+label { display: block; font-size: 14px; color: var(--muted); margin-bottom: 6px; }
+input[type=text], input[type=password], input[type=number], select {
+  width: 100%; background: transparent; border: 1px solid var(--line); border-radius: 14px;
+  padding: 12px 16px; font-weight: 300;
+}
+select option { background: var(--panel); }
+input:disabled, select:disabled { opacity: .45; cursor: not-allowed; }
+.field { margin-bottom: 16px; }
+.row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.btn {
+  display: inline-flex; align-items: center; gap: 10px; cursor: pointer;
+  border: 1px solid var(--text); background: transparent; border-radius: 99px; padding: 11px 26px;
+  font-weight: 400; letter-spacing: .02em;
+}
+.btn:hover { background: var(--text); color: var(--ink); }
+.btn.primary { border-color: var(--accent); background: var(--accent); color: #1a0509; }
+.btn.primary:hover { background: #f2748a; border-color: #f2748a; color: #1a0509; }
+.btn.quiet { border-color: var(--line); color: var(--muted); padding: 7px 18px; font-size: 14px; }
+.btn.quiet:hover { color: var(--ink); }
+.btn:disabled { opacity: .4; cursor: not-allowed; }
+.note { color: var(--muted); font-size: 14px; }
+.lockbox { border: 1px dashed var(--line); border-radius: var(--radius); padding: 22px 28px; color: var(--muted); }
+.lockbox b { color: var(--text); font-weight: 400; }
+
+.flash { border-radius: 14px; padding: 12px 18px; margin-bottom: 28px; border: 1px solid var(--line); }
+.flash.ok { border-color: rgba(143,214,180,.45); color: var(--good); }
+.flash.error { border-color: rgba(232,85,109,.55); color: #ff9aab; }
+
+/* ---------- advice ---------- */
+.alert { border-left: 2px solid var(--accent); padding: 4px 0 4px 20px; margin-bottom: 18px; }
+.alert b { font-weight: 400; }
+.opt { display: grid; grid-template-columns: 1fr auto; gap: 18px; align-items: center; }
+.opt + .opt { margin-top: 14px; }
+.opt h3 em { font-family: var(--serif); font-style: italic; color: var(--muted); font-weight: 400; }
+.opt p { margin: 6px 0 0; color: var(--muted); font-size: 15px; }
+@media (max-width: 640px) { .opt { grid-template-columns: 1fr; } }
+
+/* ---------- login ---------- */
+body.login {
+  min-height: 100vh;
+  background:
+    radial-gradient(ellipse 70% 55% at 50% 0%, #26262d 0%, rgba(12,12,14,0) 70%),
+    var(--ink);
+}
+.login main { max-width: 1100px; margin: 0 auto; padding: clamp(40px, 9vh, 110px) 24px 80px; text-align: center; }
+.login h1 { font-size: clamp(40px, 8vw, 104px); font-weight: 200; letter-spacing: .06em; text-transform: uppercase; line-height: 1.02; }
+.login h1 .serif { display: block; text-transform: none; letter-spacing: 0; font-family: var(--serif); font-style: italic; font-weight: 400; color: var(--muted); font-size: 1.05em; }
+.login .lede { color: var(--muted); max-width: 52ch; margin: 28px auto 48px; }
+.panel { max-width: 420px; margin: 0 auto; text-align: left; }
+.roles { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 28px; }
+.demo { max-width: 420px; margin: 22px auto 0; font-size: 14px; color: var(--muted); text-align: left; }
+.demo table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+.demo td { padding: 6px 0; border-bottom: 1px solid var(--line-soft); }
+.demo td:last-child { text-align: right; font-variant-numeric: tabular-nums; }
+
+.center-page { text-align: center; padding-top: 12vh; }
+.center-page h1 { font-size: clamp(40px, 7vw, 84px); }

@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}Sign in · Intze Tank Platform{% endblock %}
+{% block bodyclass %}login{% endblock %}
+{% block body %}
+<header class="bar">
+  <span class="brand">Intze<span>engine</span></span>
+  <span class="note">B.Tech major project · SMIT</span>
+</header>
+<main>
+  <h1>The design engine <span class="serif">that stays on site</span></h1>
+  <p class="lede">Design an Intze water tank, then keep the plan honest through every pour: when material runs short or site rules change, it finds the smallest change that still works.</p>
+
+  <form class="card panel" method="post" action="{{ url_for('login') }}">
+    <input type="hidden" name="csrf" value="{{ csrf_token() }}">
+    {% with msgs = get_flashed_messages(with_categories=true) %}
+      {% for cat, m in msgs %}<div class="flash {{ cat }}" role="alert">{{ m }}</div>{% endfor %}
+    {% endwith %}
+    <div class="field">
+      <label for="username">Username</label>
+      <input id="username" name="username" type="text" autocomplete="username" required autofocus>
+    </div>
+    <div class="field">
+      <label for="password">Password</label>
+      <input id="password" name="password" type="password" autocomplete="current-password" required>
+    </div>
+    <button class="btn primary" type="submit">Sign in</button>
+  </form>
+
+  <div class="demo">
+    Demo accounts (replace before any real use)
+    <table>
+      <tr><td>Project Manager</td><td>manager · Manager@123</td></tr>
+      <tr><td>Site Engineer</td><td>site · Site@123</td></tr>
+      <tr><td>Client</td><td>client · Client@123</td></tr>
+    </table>
+  </div>
+</main>
+{% endblock %}

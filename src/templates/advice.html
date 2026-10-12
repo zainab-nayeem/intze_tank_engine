@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}Advice · Intze Tank Platform{% endblock %}
+{% block content %}
+<section>
+  <h2>Advice</h2>
+  <p class="sub">Checked against today's site data, stock and locks. Options are listed smallest change first; options that cost more and are less safe than another are left out. Cost to complete counts concrete only (steel is not yet included here).</p>
+
+  {% set problems = a.shortfall or a.current_short %}
+  {% if a.shortfall %}
+  <div class="alert"><b>Built columns are under-sized.</b> They were cast at {{ '%.0f'|format(a.shortfall.built_mm) }} mm; today's site data needs {{ '%.0f'|format(a.shortfall.required_mm) }} mm. Jacketing is roughly {{ a.shortfall.jacket_m3 }} m³ of extra concrete (relative cost +{{ a.shortfall.jacket_cost }}). A structural engineer has to design the fix.</div>
+  {% endif %}
+  {% for g, pair in a.current_short.items() %}
+  <div class="alert"><b>Not enough M{{ g }} in store.</b> The current plan needs {{ '%.1f'|format(pair[0]) }} m³ and {{ '%.1f'|format(pair[1]) }} m³ is available.</div>
+  {% endfor %}
+  {% if not problems %}
+  <div class="card" style="margin-bottom:18px">No problems with the current plan.</div>
+  {% endif %}
+
+  {% if not a.options %}
+  <div class="lockbox"><b>No feasible option with the current stock, cap and locks.</b> Relax one of them: add concrete stock, raise the cost cap, or have the engineer review an element that is already built.</div>
+  {% else %}
+  {% for o in a.options[:4] %}
+  <div class="card opt">
+    <div>
+      <h3>{{ o.num_columns }} columns, M{{ o.grade }}
+        <em>{% if o.changes == 0 %}keep current plan{% else %}{{ o.changes }} change{{ 's' if o.changes > 1 }}{% endif %}</em></h3>
+      <p>Cost to complete {{ o.cost_to_complete }} ({{ '%+.1f'|format(o.cost_to_complete - a.current_cost) }} against today's plan) · lateral load {{ '%.0f'|format(o.lateral_kn) }} kN per column</p>
+      <p>Concrete still needed: {% for g, v in o.need.items() %}M{{ g }} {{ v }} m³{% if not loop.last %}, {% endif %}{% endfor %}</p>
+    </div>
+    {% if o.changes > 0 %}
+      {% if 'approve' in can %}
+      <form method="post" action="{{ url_for('post_accept') }}">
+        <input type="hidden" name="csrf" value="{{ csrf_token() }}">
+        <input type="hidden" name="option" value="{{ loop.index }}">
+        <button class="btn" type="submit">Adopt this option</button>
+      </form>
+      {% else %}
+      <span class="note">Needs the Project Manager's approval</span>
+      {% endif %}
+    {% endif %}
+  </div>
+  {% endfor %}
+  {% endif %}
+</section>
+{% endblock %}

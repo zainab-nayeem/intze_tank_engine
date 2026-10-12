@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}Not allowed · Intze Tank Platform{% endblock %}
+{% block content %}
+<section class="center-page">
+  {% if bad %}
+  <h1>That did not go through</h1>
+  <p class="sub" style="margin:20px auto 32px">The form had expired. Go back, reload the page and try again.</p>
+  {% else %}
+  <h1>Not part of your role</h1>
+  <p class="sub" style="margin:20px auto 32px">{% if user %}{{ role_label[user.role] }} accounts cannot open this page or make this change. Ask the Project Manager if you need it.{% else %}Sign in first.{% endif %}</p>
+  {% endif %}
+  <a class="btn" href="{{ url_for('overview') }}">Back to overview</a>
+</section>
+{% endblock %}

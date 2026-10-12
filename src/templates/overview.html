@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block title %}Overview · Intze Tank Platform{% endblock %}
+{% block content %}
+{% set len = 282.74 %}
+<section class="hero">
+  <div>
+    <div class="big">{{ '%.0f'|format(pct) }}<small>%</small><span class="accent-serif">complete</span></div>
+    <p class="sub" style="margin-top:24px">
+      The plan is <b style="font-weight:400">{{ st.plan.num_columns }} staging columns in M{{ st.plan.grade }}</b>{% if locked %}; the column count is locked because columns are already being cast{% endif %}.
+      Every stage below is weighted by how much of the project it represents.
+    </p>
+  </div>
+  <svg class="ring" viewBox="0 0 100 100" role="img" aria-label="Project {{ '%.0f'|format(pct) }} percent complete">
+    <circle class="track" cx="50" cy="50" r="45"/>
+    <circle class="fill" cx="50" cy="50" r="45" style="--len:{{ len }};stroke-dasharray:{{ len }};stroke-dashoffset:{{ '%.2f'|format(len * (1 - pct/100)) }}"/>
+    <text x="50" y="52" text-anchor="middle">overall progress</text>
+  </svg>
+</section>
+
+<section>
+  <h2>Stages</h2>
+  <p class="sub">Where each part of the tank stands. A grade is locked the moment a stage starts, so later advice never changes what is already built.</p>
+  <div class="grid g3">
+    {% for s, w in weights.items() %}
+    <article class="card stage">
+      <div class="top"><h3>{{ STAGE_LABEL[s] }}</h3>
+        {% if s in st.stage_grade %}<span class="tag locked">M{{ st.stage_grade[s] }} locked</span>{% endif %}</div>
+      <div class="pct">{{ '%.0f'|format(st.progress[s]) }}%</div>
+      <div class="note">{{ '%.0f'|format(w*100) }}% of the project</div>
+      <div class="meter" role="img" aria-label="{{ '%.0f'|format(st.progress[s]) }} percent"><i style="width:{{ st.progress[s] }}%"></i></div>
+    </article>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="grid g2">
+  <div class="card">
+    <h3>Site and plan</h3>
+    <dl class="facts">
+      <div><dt>Staging height</dt><dd>{{ '%.0f'|format(st.site.staging_height_m) }} m</dd></div>
+      <div><dt>Seismic zone factor</dt><dd>{{ st.site.seismic_zone_factor }}</dd></div>
+      <div><dt>Basic wind speed</dt><dd>{{ st.site.wind_speed_m_s }} m/s</dd></div>
+      <div><dt>Soil bearing</dt><dd>{{ '%.0f'|format(st.site.soil_bearing_kpa) }} kPa</dd></div>
+      <div><dt>Capacity</dt><dd>{{ '{:,.0f}'.format(st.site.capacity_liters / 1000) }} kL</dd></div>
+      <div><dt>Cost cap</dt><dd>{{ st.max_cost if st.max_cost else 'none' }}</dd></div>
+    </dl>
+  </div>
+  <div class="card">
+    <h3>Concrete in store</h3>
+    {% if st.stock_m3 %}
+    <dl class="facts">
+      {% for g, v in st.stock_m3.items()|sort %}
+      <div><dt>M{{ g }}</dt><dd>{{ '%.0f'|format(v) }} m³</dd></div>
+      {% endfor %}
+    </dl>
+    <p class="note" style="margin-top:20px">Grades not listed are treated as unlimited.</p>
+    {% else %}
+    <p class="sub" style="margin-top:12px">No stock limits recorded, so every grade counts as available. The site engineer can record what is actually in store.</p>
+    {% endif %}
+  </div>
+</section>
+
+<section>
+  <h2>Recent decisions</h2>
+  <p class="sub">Every change is recorded with the role that made it.</p>
+  <div class="card">
+    <ul class="log">
+      {% for e in recent %}
+      <li><time>{{ e.time }}</time><span>{{ e.text }}</span></li>
+      {% endfor %}
+    </ul>
+  </div>
+</section>
+{% endblock %}
