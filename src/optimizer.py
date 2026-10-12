@@ -162,6 +162,30 @@ def verify_against_real_engine(candidate, site):
     }
 
 
+def refine_with_real_engine(candidates, site):
+    """Re-compute every surrogate candidate on the REAL engine, then drop
+    any design that the real numbers show is dominated (another design is
+    at least as cheap AND has at least as low a column load, and is better
+    in one). The surrogate is only used to find candidates quickly; the
+    real engine decides what is truly Pareto-optimal."""
+    rows = []
+    for c in candidates:
+        real = verify_against_real_engine(c, site)
+        rows.append({**c, **real})
+    keep = []
+    for i, a in enumerate(rows):
+        dominated = any(
+            b["real_cost"] <= a["real_cost"]
+            and b["real_extra_axial_kn"] <= a["real_extra_axial_kn"]
+            and (b["real_cost"] < a["real_cost"]
+                 or b["real_extra_axial_kn"] < a["real_extra_axial_kn"])
+            for j, b in enumerate(rows) if j != i)
+        if not dominated:
+            keep.append(a)
+    keep.sort(key=lambda r: r["real_cost"])
+    return keep, len(rows) - len(keep)
+
+
 if __name__ == "__main__":
     SITE = {
         "capacity_liters": 500_000, "staging_height_m": 16.0,
@@ -170,11 +194,13 @@ if __name__ == "__main__":
     }
     print(f"=== Optimizing: {SITE} ===\n")
     candidates = run_optimization(SITE)
-    print(f"Found {len(candidates)} Pareto-optimal design candidates:\n")
-    for c in candidates:
-        real = verify_against_real_engine(c, SITE)
+    final, dropped = refine_with_real_engine(candidates, SITE)
+    print(f"Surrogate proposed {len(candidates)} candidates; the real engine "
+          f"showed {dropped} of them to be dominated and removed them.")
+    print(f"Final Pareto-optimal designs (real-engine values): {len(final)}\n")
+    for c in final:
         print(f"  {c['num_columns']} columns, M{c['concrete_grade_mpa']}")
         print(f"    surrogate: cost={c['surrogate_cost']}, extra_axial={c['surrogate_extra_axial_kn']} kN")
-        print(f"    real     : cost={real['real_cost']}, extra_axial={real['real_extra_axial_kn']} kN, "
-              f"column_dia={real['real_column_dia_mm']} mm")
+        print(f"    real     : cost={c['real_cost']}, extra_axial={c['real_extra_axial_kn']} kN, "
+              f"column_dia={c['real_column_dia_mm']} mm")
         print()
