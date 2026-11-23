@@ -16,6 +16,7 @@
   <nav class="nav" aria-label="Main">
     <a href="{{ url_for('overview') }}" {% if page == 'overview' %}aria-current="page"{% endif %}>Overview</a>
     {% if 'log' in can %}<a href="{{ url_for('site_desk') }}" {% if page == 'site' %}aria-current="page"{% endif %}>Site desk</a>{% endif %}
+    <a href="{{ url_for('design') }}" {% if page == 'design' %}aria-current="page"{% endif %}>Design</a>
     <a href="{{ url_for('advice') }}" {% if page == 'advice' %}aria-current="page"{% endif %}>Advice</a>
   </nav>
   <div class="who">

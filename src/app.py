@@ -28,6 +28,7 @@ from flask import (Flask, abort, flash, g, redirect, render_template, request,
 from werkzeug.security import check_password_hash, generate_password_hash
 
 import construction_tracker as ct
+import optimizer as opt
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("INTZE_SECRET_KEY", "demo-only-change-me")
@@ -162,6 +163,52 @@ def site_desk():
     st = get_state()
     return render_template("site_desk.html", page="site", st=st,
                            grades=ct.GRADES, weights=ct.STAGE_WEIGHTS)
+
+
+DESIGN_LIMITS = {
+    "capacity_kl": (50, 2000, "Capacity (kL)"),
+    "staging_height_m": (6, 30, "Staging height (m)"),
+    "soil_bearing_kpa": (50, 500, "Soil bearing (kPa)"),
+    "wind_speed_m_s": (30, 60, "Basic wind speed (m/s)"),
+    "seismic_zone_factor": (0.05, 0.40, "Seismic zone factor"),
+}
+
+
+@app.route("/design", methods=["GET", "POST"])
+@need("view")
+def design():
+    form = {"capacity_kl": 500, "staging_height_m": 16, "soil_bearing_kpa": 150,
+            "wind_speed_m_s": 44, "seismic_zone_factor": 0.16}
+    results = None
+    dropped = 0
+    if request.method == "POST":
+        vals = {}
+        for key, (lo, hi, label) in DESIGN_LIMITS.items():
+            raw = request.form.get(key, "").strip()
+            form[key] = raw
+            try:
+                v = float(raw)
+            except ValueError:
+                flash(f"{label}: enter a number.", "error")
+                return render_template("design.html", page="design", form=form,
+                                       results=None, dropped=0, limits=DESIGN_LIMITS)
+            if not lo <= v <= hi:
+                flash(f"{label} must be between {lo} and {hi}.", "error")
+                return render_template("design.html", page="design", form=form,
+                                       results=None, dropped=0, limits=DESIGN_LIMITS)
+            vals[key] = v
+        site = {"capacity_liters": vals["capacity_kl"] * 1000,
+                "staging_height_m": vals["staging_height_m"],
+                "soil_bearing_kpa": vals["soil_bearing_kpa"],
+                "wind_speed_m_s": vals["wind_speed_m_s"],
+                "seismic_zone_factor": vals["seismic_zone_factor"]}
+        try:
+            cands = quiet(opt.run_optimization, site)
+            results, dropped = quiet(opt.refine_with_real_engine, cands, site)
+        except Exception:
+            flash("The design could not be computed for these inputs. Check them and try again.", "error")
+    return render_template("design.html", page="design", form=form, results=results,
+                           dropped=dropped, limits=DESIGN_LIMITS)
 
 
 @app.route("/advice")

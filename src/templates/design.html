@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}Design · Intze Tank Platform{% endblock %}
+{% block content %}
+<section>
+  <h2>Design</h2>
+  <p class="sub">Enter the site and the optimiser returns the best trade-offs between cost and load on each staging column. Every design shown has been re-computed on the real design engine. Costs are relative and illustrative, and wind and seismic use simplified static methods.</p>
+  <form class="card" method="post" action="{{ url_for('design') }}">
+    <input type="hidden" name="csrf" value="{{ csrf_token() }}">
+    <div class="row">
+      <div class="field"><label for="capacity_kl">{{ limits.capacity_kl[2] }}</label>
+        <input id="capacity_kl" name="capacity_kl" type="number" step="10" value="{{ form.capacity_kl }}" required></div>
+      <div class="field"><label for="staging_height_m">{{ limits.staging_height_m[2] }}</label>
+        <input id="staging_height_m" name="staging_height_m" type="number" step="0.5" value="{{ form.staging_height_m }}" required></div>
+    </div>
+    <div class="row">
+      <div class="field"><label for="wind_speed_m_s">{{ limits.wind_speed_m_s[2] }}</label>
+        <input id="wind_speed_m_s" name="wind_speed_m_s" type="number" step="1" value="{{ form.wind_speed_m_s }}" required></div>
+      <div class="field"><label for="seismic_zone_factor">{{ limits.seismic_zone_factor[2] }}</label>
+        <input id="seismic_zone_factor" name="seismic_zone_factor" type="number" step="0.01" value="{{ form.seismic_zone_factor }}" required></div>
+    </div>
+    <div class="field"><label for="soil_bearing_kpa">{{ limits.soil_bearing_kpa[2] }}</label>
+      <input id="soil_bearing_kpa" name="soil_bearing_kpa" type="number" step="5" value="{{ form.soil_bearing_kpa }}" required></div>
+    <button class="btn primary" type="submit">Find designs</button>
+  </form>
+</section>
+
+{% if results %}
+<section>
+  <h2>Options</h2>
+  <p class="sub">Cheapest first. More columns lower the load on each column but cost more; a higher grade lowers it a little more. There is no single best answer, so the engineer chooses.{% if dropped %} {{ dropped }} candidate{{ 's' if dropped > 1 }} removed because the real engine showed {{ 'it was' if dropped == 1 else 'they were' }} beaten by another.{% endif %}</p>
+  {% for r in results %}
+  <div class="card opt">
+    <div>
+      <h3>{{ r.num_columns }} columns, M{{ r.concrete_grade_mpa }}</h3>
+      <p>Relative cost {{ '%.1f'|format(r.real_cost) }} · extra axial load {{ '%.0f'|format(r.real_extra_axial_kn) }} kN per column · column diameter {{ '%.0f'|format(r.real_column_dia_mm) }} mm</p>
+    </div>
+  </div>
+  {% endfor %}
+</section>
+{% endif %}
+{% endblock %}
