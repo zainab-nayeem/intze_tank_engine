@@ -16,7 +16,7 @@
 <section>
   <h2>Cheapest arrangement: {{ result.best.k }} tank{{ 's' if result.best.k > 1 }}</h2>
   <p class="sub">Total relative cost {{ '%.0f'|format(result.total) }} (tank structures {{ '%.0f'|format(result.best.tank_cost) }} + site overhead {{ '%.0f'|format(result.overhead * result.best.k) }} + distribution proxy {{ '%.0f'|format(result.best.dist_cost) }}). Design year +{{ result.years }} years, storage {{ '%.2f'|format(result.frac) }} × daily demand, service radius {{ result.radius }} km.</p>
-  <div class="card" style="padding:8px"><div id="map" role="img" aria-label="Map of zones and tanks"></div></div>
+  <div class="card" style="padding:8px"><div id="map" class="plot2d" role="img" aria-label="Map of zones and tanks"></div></div>
   {% for t in result.tanks %}
   <div class="card opt" style="margin-top:14px">
     <div>
@@ -52,7 +52,11 @@
 <script src="{{ url_for('vendor_plotly') }}"></script>
 <script>
   var fig = {{ result.fig_json|safe }};
-  Plotly.newPlot('map', fig.data, fig.layout, {responsive: true, displaylogo: false});
+  fig.layout.autosize = true;
+  window.addEventListener('load', function () {
+    Plotly.newPlot('map', fig.data, fig.layout, {responsive: true, displaylogo: false});
+    setTimeout(function () { Plotly.Plots.resize(document.getElementById('map')); }, 300);
+  });
 </script>
 {% endif %}
 {% endblock %}
