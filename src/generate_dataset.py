@@ -108,7 +108,7 @@ def generate_dataset(num_samples: int, output_path: str) -> dict:
 
 
 if __name__ == "__main__":
-    result = generate_dataset(num_samples=8000, output_path="intze_dataset.csv")
+    result = generate_dataset(num_samples=20000, output_path="intze_dataset.csv")
     print("=== Dataset Generation Complete ===")
     for k, v in result.items():
         print(f"{k}: {v}")

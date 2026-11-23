@@ -367,8 +367,8 @@ def demo():
     set_progress(st, "foundation", 100)
     set_progress(st, "staging", 60)
 
-    print("\n>>> Store: only 30 m3 of M20 left until next delivery")
-    set_stock(st, 20, 30)
+    print("\n>>> Store: only 40 m3 of M20 left until next delivery")
+    set_stock(st, 20, 40)
     advise(st)
     accept(st, 1)
 

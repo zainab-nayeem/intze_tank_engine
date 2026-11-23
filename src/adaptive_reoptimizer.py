@@ -53,8 +53,8 @@ TIMELINE = [
          changes={"staging_height_m": 20.0}),
     dict(month=4, label="Site re-classified to Seismic Zone V (zone factor 0.36)",
          changes={"seismic_zone_factor": 0.36}),
-    dict(month=5, label="Client imposes a relative-cost cap of 635",
-         changes={"max_cost": 635.0}),
+    dict(month=5, label="Client imposes a relative-cost cap of 835",
+         changes={"max_cost": 835.0}),
 ]
 
 

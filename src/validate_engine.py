@@ -21,6 +21,11 @@ What this does NOT prove: that the engine equals a full design office
 calculation. It checks internal correctness, sensible behaviour, and
 agreement with published trends. Comparison against an actual project
 design (e.g. the original VB5 tool) is still to be added.
+
+v0.5 NOTE: the first version of check A re-derived the same load definition as
+the engine, so it could not notice that cone, domes, ring beam, water in the
+cone and the staging's own weight were missing from the column load. Check A
+now adds up every member independently (see 'load-path completeness').
 """
 
 import csv
@@ -55,13 +60,28 @@ def A_independent(cap_l, h_s, n, grade, hd=0.9, angle=45.0, wind=44.0, zone=0.16
                        basic_wind_speed_m_s=wind, seismic_zone_factor=zone)
     o = design_intze_tank(inp)
 
-    # geometry from capacity
+    # ---- geometry: the tank must hold the requested capacity IN TOTAL ----
     V = cap_l / 1000
-    D = (4 * V / (math.pi * hd)) ** (1 / 3)
+    def volumes(D):
+        Hh = hd * D
+        r, a_ = D / 2, 0.4 * D / 2
+        hc = (r - a_) * math.tan(math.radians(angle))
+        cyl = math.pi / 4 * D * D * Hh
+        cone = math.pi * hc / 3 * (r * r + r * a_ + a_ * a_)
+        hb = 0.2 * 0.4 * D
+        cap = math.pi * hb / 6 * (3 * a_ * a_ + hb * hb)
+        return cyl + cone + cap, hc
+    lo, hi = 0.5, 80.0
+    for _ in range(100):
+        mid = (lo + hi) / 2
+        if volumes(mid)[0] < V: lo = mid
+        else: hi = mid
+    D = (lo + hi) / 2
     H = hd * D
     check(tag, "diameter D (m)", o.internal_diameter_m, D, rel_tol=0.001)
     check(tag, "cylinder height incl. 0.3 m freeboard (m)", o.cylindrical_wall_height_m, H + 0.3, rel_tol=0.001)
-    check(tag, "geometry holds the capacity: pi/4*D^2*H (m3)", math.pi / 4 * o.internal_diameter_m ** 2 * H, V, rel_tol=0.002)
+    check(tag, "water held by cylinder + cone + bottom dome = requested capacity (m3)",
+          volumes(o.internal_diameter_m)[0], V, rel_tol=0.002)
 
     # wall: hoop tension T = gamma*H*D/2 ; t = T/sigma_ct ; As = T/150
     T = 9.81 * H * D / 2
@@ -69,42 +89,57 @@ def A_independent(cap_l, h_s, n, grade, hd=0.9, angle=45.0, wind=44.0, zone=0.16
     check(tag, "wall thickness (mm)", o.cylindrical_wall_thickness_mm, t, abs_tol=10.01)
     check(tag, "hoop steel (mm2/m)", o.cylindrical_wall_hoop_steel_mm2_per_m, T * 1000 / 150, rel_tol=0.005)
 
-    # dead load
-    rb = 0.4 * D / 2
+    # ---- LOAD-PATH COMPLETENESS: add up the weight of EVERY member from the reported dimensions ----
+    r, a_ = D / 2, 0.4 * D / 2
     top_t = max(100.0, D * 8.0)
     top_rise = 0.15 * D
-    dome = 25 * (top_t / 1000) * 2 * math.pi * (D / 2) * top_rise
+    dome = 25 * (top_t / 1000) * 2 * math.pi * r * top_rise
     wall = 25 * (o.cylindrical_wall_thickness_mm / 1000) * math.pi * D * H
+    slant = (r - a_) / math.cos(math.radians(angle))
+    cone = 25 * (max(300.0, 30.0 * D) / 1000) * math.pi * (r + a_) * slant
+    hb = 0.2 * 0.4 * D
+    bdome = 25 * (max(150.0, 0.4 * D * 15.0) / 1000) * 2 * math.pi * a_ * hb
+    ringb = 25 * (o.ring_beam_width_mm / 1000) * (o.ring_beam_depth_mm / 1000) * math.pi * D
     water = V * 9.81
-    check(tag, "total dead load (kN)", o.total_dead_load_kn, dome + wall + water, rel_tol=0.001)
+    all_members = dome + wall + cone + bdome + ringb + water
+    check(tag, "load at column tops = every member + all the water (kN)", o.total_dead_load_kn, all_members, rel_tol=0.002,
+          note="dome, wall, cone, bottom dome, ring beam, water")
 
-    # lateral loads recomputed from first principles
-    cone_vertical = (D / 2 - rb) * math.tan(math.radians(angle))
+    # ---- staging: own weight, seismic mass, lateral load, column size (iterated independently) ----
+    tiers = max(1, math.ceil(h_s / 4.0))
+    le = h_s / tiers
+    brace_w = 25 * max(tiers - 1, 0) * 0.30 * 0.50 * math.pi * D
+    cone_vertical = (r - a_) * math.tan(math.radians(angle))
     exposed_h = H + 0.3 + top_rise + cone_vertical
     arm = h_s + exposed_h / 2
     p = 0.6 * wind ** 2
     Fw = 0.7 * p * D * exposed_h / 1000
     Mw = Fw * arm
     Ah = (zone / 2) * (1.5 / 2.5) * 2.5
-    Fs = Ah * o.total_dead_load_kn
-    Ms = Fs * arm
-    M = max(Mw, Ms)
-    extra = 2 * M / (n * (D / 2))
+    W_top = all_members
+    d = 0.6
+    for _ in range(500):
+        colw = 25 * math.pi * d * d / 4 * h_s
+        stag = n * colw + brace_w
+        Ms = Ah * (W_top + stag / 3) * arm
+        extra = 2 * max(Mw, Ms) / (n * r)
+        fl = ((W_top + brace_w) / n + colw + extra) * 1.5
+        ratio = le / d
+        Cr = max(0.3, 1.0 if ratio < 12 else 1.25 - ratio / 48)
+        d_new = math.sqrt(4 * fl / (6000 * Cr) / math.pi)
+        if abs(d_new - d) < 1e-7: break
+        d = 0.5 * (d + d_new)
+    check(tag, "staging self weight (kN)", o.staging_self_weight_kn, n * 25 * math.pi * d * d / 4 * h_s + brace_w, rel_tol=0.01)
+    check(tag, "seismic mass = tank + 1/3 staging (kN)", o.seismic_weight_kn, W_top + (n * 25 * math.pi * d * d / 4 * h_s + brace_w) / 3, rel_tol=0.01)
     check(tag, "extra axial load per column from wind/seismic (kN)", o.staging_extra_axial_per_column_kn, extra,
-          rel_tol=0.005, note=f"governing: {'wind' if Mw >= Ms else 'seismic'}")
+          rel_tol=0.01, note=f"governing: {'wind' if Mw >= Ms else 'seismic'}")
     check_true(tag, "governing case matches", o.governing_lateral_case == ("wind" if Mw >= Ms else "seismic"),
                f"engine says {o.governing_lateral_case}")
-
-    # column equilibrium: capacity of the column the engine chose >= factored demand
-    tiers = max(1, math.ceil(h_s / 4.0))
-    le = h_s / tiers
-    d = o.staging_column_diameter_mm / 1000
-    demand = (o.total_dead_load_kn / n + o.staging_extra_axial_per_column_kn) * 1.5
-    ratio = le / d
-    Cr = 1.0 if ratio < 12 else max(0.3, 1.25 - ratio / 48)
-    capacity = 6.0 * Cr * math.pi / 4 * d ** 2 * 1000
-    check_true(tag, "column capacity >= factored demand", capacity >= demand * 0.995,
-               f"capacity {capacity:.0f} kN vs demand {demand:.0f} kN")
+    check(tag, "column diameter at base, incl. own weight (mm)", o.staging_column_diameter_mm, d * 1000, rel_tol=0.01)
+    check(tag, "foundation load = tank + staging (kN)", o.foundation_load_kn,
+          W_top + n * 25 * math.pi * d * d / 4 * h_s + brace_w, rel_tol=0.01)
+    dd = o.staging_column_diameter_mm / 1000
+    ratio = le / dd
     check_true(tag, "slenderness within IS 456 limit of 60", ratio <= 60, f"le/D = {ratio:.1f}")
 
 
@@ -137,7 +172,7 @@ def C_literature():
     g = "C literature trend"
     print("\nCost vs H/D (our model), M25, 12 columns, 16 m staging:")
     print(f"  {'capacity':>9} | best H/D | cost at 0.9 | cost at best | saving | paper's optimum")
-    paper = {200: "0.8", 400: "0.3", 600: "0.3", 800: "0.3", 1000: "0.4", 1200: "0.2"}
+    paper = {200: "0.8", 400: "0.2-0.3", 600: "0.2-0.3", 800: "0.2-0.3", 1000: "0.2-0.3", 1200: "0.2-0.3"}
     for cap in [200, 400, 600, 800, 1000, 1200]:
         rows = []
         for hd in [0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]:

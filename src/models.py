@@ -86,5 +86,9 @@ class DesignOutputs:
     cone_volume_m3: float = None
     foundation_volume_m3: float = None
     bracing_volume_m3: float = None
+    staging_self_weight_kn: float = None      # columns + bracing (v0.5)
+    foundation_load_kn: float = None          # tank + staging, used to size the foundation (v0.5)
+    seismic_weight_kn: float = None           # tank + 1/3 staging (v0.5)
+    actual_water_volume_m3: float = None      # cylinder + cone + bottom dome (v0.5)
     warnings: list = field(default_factory=list)
     assumptions: list = field(default_factory=list)
