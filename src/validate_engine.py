@@ -83,11 +83,11 @@ def A_independent(cap_l, h_s, n, grade, hd=0.9, angle=45.0, wind=44.0, zone=0.16
     check(tag, "water held by cylinder + cone + bottom dome = requested capacity (m3)",
           volumes(o.internal_diameter_m)[0], V, rel_tol=0.002)
 
-    # wall: hoop tension T = gamma*H*D/2 ; t = T/sigma_ct ; As = T/150
+    # wall: hoop tension T = gamma*H*D/2 ; t = T/sigma_ct ; As = T/130 (t<=225 mm) or T/150
     T = 9.81 * H * D / 2
     t = max(150.0, math.ceil(T / SIGMA_CT[grade] / 10) * 10)
     check(tag, "wall thickness (mm)", o.cylindrical_wall_thickness_mm, t, abs_tol=10.01)
-    check(tag, "hoop steel (mm2/m)", o.cylindrical_wall_hoop_steel_mm2_per_m, T * 1000 / 150, rel_tol=0.005)
+    check(tag, "hoop steel (mm2/m)", o.cylindrical_wall_hoop_steel_mm2_per_m, T * 1000 / (130 if t <= 225 else 150), rel_tol=0.005)
 
     # ---- LOAD-PATH COMPLETENESS: add up the weight of EVERY member from the reported dimensions ----
     r, a_ = D / 2, 0.4 * D / 2

@@ -36,7 +36,12 @@ PERMISSIBLE_TENSILE_STRESS_CONCRETE_MPA = {
 # Permissible tensile stress in steel for members in direct tension in
 # water-retaining structures (Fe415) -- kept low vs normal RCC (usually
 # 230 MPa) specifically to control crack width and keep the tank watertight.
+# IS 3370 (Part 2): lower steel stress in thin members to control crack width.
+# 130 MPa for wall thickness <= 225 mm, 150 MPa above (Fe415). Values taken from
+# textbook summaries of the code; to be confirmed against the printed table.
+PERMISSIBLE_STEEL_STRESS_THIN_MPA = 130.0
 PERMISSIBLE_STEEL_STRESS_WATER_TANK_MPA = 150.0
+THIN_MEMBER_LIMIT_MM = 225.0
 
 MIN_WALL_THICKNESS_MM = 150.0
 
@@ -68,7 +73,9 @@ def design_cylindrical_wall(diameter_m: float, water_head_m: float,
     # the FULL tension at the permissible steel stress (i.e., assume
     # concrete has cracked and steel alone resists -- standard
     # conservative design assumption)
-    required_steel_mm2_per_m = (T_max_kn_per_m * 1000) / PERMISSIBLE_STEEL_STRESS_WATER_TANK_MPA
+    sigma_st = (PERMISSIBLE_STEEL_STRESS_THIN_MPA if final_thickness_mm <= THIN_MEMBER_LIMIT_MM
+                else PERMISSIBLE_STEEL_STRESS_WATER_TANK_MPA)
+    required_steel_mm2_per_m = (T_max_kn_per_m * 1000) / sigma_st
 
     return {
         "max_hoop_tension_kn_per_m": round(T_max_kn_per_m, 2),
@@ -76,6 +83,7 @@ def design_cylindrical_wall(diameter_m: float, water_head_m: float,
         "required_thickness_mm": round(required_thickness_mm, 1),
         "final_thickness_mm": final_thickness_mm,
         "required_hoop_steel_mm2_per_m": round(required_steel_mm2_per_m, 1),
+        "permissible_steel_stress_mpa": sigma_st,
         "note": (
             "Governing case = maximum hoop tension at wall base (full "
             "water depth), applied uniformly up the whole wall. This is "

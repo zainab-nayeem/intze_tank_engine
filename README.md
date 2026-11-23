@@ -45,6 +45,6 @@ python test_app.py
 Checks login, role limits, CSRF, input validation, and that no page links to an outside website.
 
 ## Honest limits
-Relative costs only; wind and seismic by simplified static methods; ring beam, cone, raft and bracing use placeholder rules;
+Relative costs only; wall steel uses 130 MPa (walls up to 225 mm) or 150 MPa (thicker), taken from textbook summaries of IS 3370 and still to be checked against the printed table; wind and seismic by simplified static methods; ring beam, cone, raft and bracing use placeholder rules;
 no live load; not yet compared with a real project or the original VB5 tool. Decision-support only: a licensed structural
 engineer must check and sign off any design.

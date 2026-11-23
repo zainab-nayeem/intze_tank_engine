@@ -29,7 +29,7 @@ group,check,engine,independent,result,note
 "A [200 kL, 12 m, 6 col, M20, H/D 0.8, cone 45 deg]",cylinder height incl. 0.3 m freeboard (m),5.435,5.435,PASS,
 "A [200 kL, 12 m, 6 col, M20, H/D 0.8, cone 45 deg]",water held by cylinder + cone + bottom dome = requested capacity (m3),199.987,200.0,PASS,
 "A [200 kL, 12 m, 6 col, M20, H/D 0.8, cone 45 deg]",wall thickness (mm),150.0,150.0,PASS,
-"A [200 kL, 12 m, 6 col, M20, H/D 0.8, cone 45 deg]",hoop steel (mm2/m),1077.9,1077.932,PASS,
+"A [200 kL, 12 m, 6 col, M20, H/D 0.8, cone 45 deg]",hoop steel (mm2/m),1243.8,1243.768,PASS,
 "A [200 kL, 12 m, 6 col, M20, H/D 0.8, cone 45 deg]",load at column tops = every member + all the water (kN),2770.83,2770.827,PASS,"dome, wall, cone, bottom dome, ring beam, water"
 "A [200 kL, 12 m, 6 col, M20, H/D 0.8, cone 45 deg]",staging self weight (kN),568.96,569.493,PASS,
 "A [200 kL, 12 m, 6 col, M20, H/D 0.8, cone 45 deg]",seismic mass = tank + 1/3 staging (kN),2960.48,2960.658,PASS,
