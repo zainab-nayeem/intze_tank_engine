@@ -224,6 +224,28 @@ def make_figure(site, candidates):
     return fig
 
 
+def make_single_figure(inputs, out, cost=None):
+    """One design, no dropdown -- used by the web app's design detail page."""
+    traces = build_design_traces(inputs, out)
+    fig = go.Figure()
+    for t in traces:
+        fig.add_trace(t)
+    note = (f"<b>{inputs.num_columns} columns, M{inputs.concrete_grade_mpa:.0f}</b><br>"
+            f"Tank dia {out.internal_diameter_m:.2f} m - column dia {out.staging_column_diameter_mm:.0f} mm<br>"
+            f"Concrete {out.concrete_volume_m3:.1f} m3" + (f" - relative cost {cost:.0f}" if cost else "") + "<br>"
+            f"Foundation: {out.foundation_type}")
+    fig.update_layout(
+        paper_bgcolor="white", showlegend=False,
+        scene=dict(aspectmode="data", xaxis=dict(visible=False), yaxis=dict(visible=False),
+                   zaxis=dict(title="height (m)", backgroundcolor="white", gridcolor="#ddd"),
+                   bgcolor="white", camera=dict(eye=dict(x=1.6, y=1.6, z=0.7))),
+        annotations=[dict(text=note, x=0.01, y=0.99, xref="paper", yref="paper", showarrow=False,
+                          align="left", xanchor="left", yanchor="top", bgcolor="rgba(255,255,255,0.85)",
+                          bordercolor="#999", borderpad=8, font=dict(size=13, color="#222")), FOOTNOTE],
+        margin=dict(l=0, r=0, t=10, b=30), height=640)
+    return fig
+
+
 if __name__ == "__main__":
     import webbrowser, os
     from optimizer import run_optimization
@@ -233,7 +255,7 @@ if __name__ == "__main__":
     candidates = run_optimization(SITE)
     print(f"Drawing {len(candidates)} Pareto-optimal designs...")
     fig = make_figure(SITE, candidates)
-    fig.write_html("tank_3d.html", include_plotlyjs=True)
+    fig.write_html("tank_3d.html", include_plotlyjs="directory")   # plotly.min.js saved next to the page, keeps the page itself clean
     path = os.path.abspath("tank_3d.html")
     print(f"Saved: {path}")
     webbrowser.open("file:///" + path.replace("\\", "/"))

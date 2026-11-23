@@ -1,44 +1,56 @@
 group,check,engine,independent,result,note
-"A [500 kL, 16 m, 8 col, M25, H/D 0.9, cone 45 deg]",diameter D (m),8.91,8.91,PASS,
-"A [500 kL, 16 m, 8 col, M25, H/D 0.9, cone 45 deg]",cylinder height incl. 0.3 m freeboard (m),8.319,8.319,PASS,
-"A [500 kL, 16 m, 8 col, M25, H/D 0.9, cone 45 deg]",geometry holds the capacity: pi/4*D^2*H (m3),499.997,500.0,PASS,
-"A [500 kL, 16 m, 8 col, M25, H/D 0.9, cone 45 deg]",wall thickness (mm),270.0,270,PASS,
-"A [500 kL, 16 m, 8 col, M25, H/D 0.9, cone 45 deg]",hoop steel (mm2/m),2336.4,2336.408,PASS,
-"A [500 kL, 16 m, 8 col, M25, H/D 0.9, cone 45 deg]",total dead load (kN),6513.67,6513.674,PASS,
-"A [500 kL, 16 m, 8 col, M25, H/D 0.9, cone 45 deg]",extra axial load per column from wind/seismic (kN),972.19,972.19,PASS,governing: seismic
+"A [500 kL, 16 m, 8 col, M25, H/D 0.9, cone 45 deg]",diameter D (m),8.43,8.43,PASS,
+"A [500 kL, 16 m, 8 col, M25, H/D 0.9, cone 45 deg]",cylinder height incl. 0.3 m freeboard (m),7.887,7.887,PASS,
+"A [500 kL, 16 m, 8 col, M25, H/D 0.9, cone 45 deg]",water held by cylinder + cone + bottom dome = requested capacity (m3),500.035,500.0,PASS,
+"A [500 kL, 16 m, 8 col, M25, H/D 0.9, cone 45 deg]",wall thickness (mm),250.0,250,PASS,
+"A [500 kL, 16 m, 8 col, M25, H/D 0.9, cone 45 deg]",hoop steel (mm2/m),2091.3,2091.343,PASS,
+"A [500 kL, 16 m, 8 col, M25, H/D 0.9, cone 45 deg]",load at column tops = every member + all the water (kN),6862.0,6861.998,PASS,"dome, wall, cone, bottom dome, ring beam, water"
+"A [500 kL, 16 m, 8 col, M25, H/D 0.9, cone 45 deg]",staging self weight (kN),2138.49,2140.23,PASS,
+"A [500 kL, 16 m, 8 col, M25, H/D 0.9, cone 45 deg]",seismic mass = tank + 1/3 staging (kN),7574.83,7575.407,PASS,
+"A [500 kL, 16 m, 8 col, M25, H/D 0.9, cone 45 deg]",extra axial load per column from wind/seismic (kN),1177.5,1177.592,PASS,governing: seismic
 "A [500 kL, 16 m, 8 col, M25, H/D 0.9, cone 45 deg]",governing case matches,,,PASS,engine says seismic
-"A [500 kL, 16 m, 8 col, M25, H/D 0.9, cone 45 deg]",column capacity >= factored demand,,,PASS,capacity 2680 kN vs demand 2680 kN
-"A [500 kL, 16 m, 8 col, M25, H/D 0.9, cone 45 deg]",slenderness within IS 456 limit of 60,,,PASS,le/D = 5.3
-"A [1000 kL, 20 m, 12 col, M30, H/D 0.4, cone 45 deg]",diameter D (m),14.71,14.71,PASS,
-"A [1000 kL, 20 m, 12 col, M30, H/D 0.4, cone 45 deg]",cylinder height incl. 0.3 m freeboard (m),6.184,6.184,PASS,
-"A [1000 kL, 20 m, 12 col, M30, H/D 0.4, cone 45 deg]",geometry holds the capacity: pi/4*D^2*H (m3),999.981,1000.0,PASS,
-"A [1000 kL, 20 m, 12 col, M30, H/D 0.4, cone 45 deg]",wall thickness (mm),290.0,290,PASS,
-"A [1000 kL, 20 m, 12 col, M30, H/D 0.4, cone 45 deg]",hoop steel (mm2/m),2830.4,2830.357,PASS,
-"A [1000 kL, 20 m, 12 col, M30, H/D 0.4, cone 45 deg]",total dead load (kN),12081.43,12081.43,PASS,
-"A [1000 kL, 20 m, 12 col, M30, H/D 0.4, cone 45 deg]",extra axial load per column from wind/seismic (kN),1301.03,1301.028,PASS,governing: seismic
+"A [500 kL, 16 m, 8 col, M25, H/D 0.9, cone 45 deg]","column diameter at base, incl. own weight (mm)",856.1,856.169,PASS,
+"A [500 kL, 16 m, 8 col, M25, H/D 0.9, cone 45 deg]",foundation load = tank + staging (kN),9000.49,9002.227,PASS,
+"A [500 kL, 16 m, 8 col, M25, H/D 0.9, cone 45 deg]",slenderness within IS 456 limit of 60,,,PASS,le/D = 4.7
+"A [1000 kL, 20 m, 12 col, M30, H/D 0.4, cone 45 deg]",diameter D (m),13.128,13.128,PASS,
+"A [1000 kL, 20 m, 12 col, M30, H/D 0.4, cone 45 deg]",cylinder height incl. 0.3 m freeboard (m),5.551,5.551,PASS,
+"A [1000 kL, 20 m, 12 col, M30, H/D 0.4, cone 45 deg]",water held by cylinder + cone + bottom dome = requested capacity (m3),999.987,1000.0,PASS,
+"A [1000 kL, 20 m, 12 col, M30, H/D 0.4, cone 45 deg]",wall thickness (mm),230.0,230,PASS,
+"A [1000 kL, 20 m, 12 col, M30, H/D 0.4, cone 45 deg]",hoop steel (mm2/m),2254.3,2254.284,PASS,
+"A [1000 kL, 20 m, 12 col, M30, H/D 0.4, cone 45 deg]",load at column tops = every member + all the water (kN),13073.66,13073.656,PASS,"dome, wall, cone, bottom dome, ring beam, water"
+"A [1000 kL, 20 m, 12 col, M30, H/D 0.4, cone 45 deg]",staging self weight (kN),5580.37,5585.498,PASS,
+"A [1000 kL, 20 m, 12 col, M30, H/D 0.4, cone 45 deg]",seismic mass = tank + 1/3 staging (kN),14933.78,14935.489,PASS,
+"A [1000 kL, 20 m, 12 col, M30, H/D 0.4, cone 45 deg]",extra axial load per column from wind/seismic (kN),1756.11,1756.307,PASS,governing: seismic
 "A [1000 kL, 20 m, 12 col, M30, H/D 0.4, cone 45 deg]",governing case matches,,,PASS,engine says seismic
-"A [1000 kL, 20 m, 12 col, M30, H/D 0.4, cone 45 deg]",column capacity >= factored demand,,,PASS,capacity 3462 kN vs demand 3462 kN
-"A [1000 kL, 20 m, 12 col, M30, H/D 0.4, cone 45 deg]",slenderness within IS 456 limit of 60,,,PASS,le/D = 4.7
-"A [200 kL, 12 m, 6 col, M20, H/D 0.8, cone 45 deg]",diameter D (m),6.828,6.828,PASS,
-"A [200 kL, 12 m, 6 col, M20, H/D 0.8, cone 45 deg]",cylinder height incl. 0.3 m freeboard (m),5.762,5.762,PASS,
-"A [200 kL, 12 m, 6 col, M20, H/D 0.8, cone 45 deg]",geometry holds the capacity: pi/4*D^2*H (m3),200.009,200.0,PASS,
-"A [200 kL, 12 m, 6 col, M20, H/D 0.8, cone 45 deg]",wall thickness (mm),160.0,160,PASS,
-"A [200 kL, 12 m, 6 col, M20, H/D 0.8, cone 45 deg]",hoop steel (mm2/m),1219.6,1219.564,PASS,
-"A [200 kL, 12 m, 6 col, M20, H/D 0.8, cone 45 deg]",total dead load (kN),2485.59,2485.592,PASS,
-"A [200 kL, 12 m, 6 col, M20, H/D 0.8, cone 45 deg]",extra axial load per column from wind/seismic (kN),298.83,298.827,PASS,governing: seismic
+"A [1000 kL, 20 m, 12 col, M30, H/D 0.4, cone 45 deg]","column diameter at base, incl. own weight (mm)",1026.5,1026.645,PASS,
+"A [1000 kL, 20 m, 12 col, M30, H/D 0.4, cone 45 deg]",foundation load = tank + staging (kN),18654.03,18659.155,PASS,
+"A [1000 kL, 20 m, 12 col, M30, H/D 0.4, cone 45 deg]",slenderness within IS 456 limit of 60,,,PASS,le/D = 3.9
+"A [200 kL, 12 m, 6 col, M20, H/D 0.8, cone 45 deg]",diameter D (m),6.419,6.419,PASS,
+"A [200 kL, 12 m, 6 col, M20, H/D 0.8, cone 45 deg]",cylinder height incl. 0.3 m freeboard (m),5.435,5.435,PASS,
+"A [200 kL, 12 m, 6 col, M20, H/D 0.8, cone 45 deg]",water held by cylinder + cone + bottom dome = requested capacity (m3),199.987,200.0,PASS,
+"A [200 kL, 12 m, 6 col, M20, H/D 0.8, cone 45 deg]",wall thickness (mm),150.0,150.0,PASS,
+"A [200 kL, 12 m, 6 col, M20, H/D 0.8, cone 45 deg]",hoop steel (mm2/m),1077.9,1077.932,PASS,
+"A [200 kL, 12 m, 6 col, M20, H/D 0.8, cone 45 deg]",load at column tops = every member + all the water (kN),2770.83,2770.827,PASS,"dome, wall, cone, bottom dome, ring beam, water"
+"A [200 kL, 12 m, 6 col, M20, H/D 0.8, cone 45 deg]",staging self weight (kN),568.96,569.493,PASS,
+"A [200 kL, 12 m, 6 col, M20, H/D 0.8, cone 45 deg]",seismic mass = tank + 1/3 staging (kN),2960.48,2960.658,PASS,
+"A [200 kL, 12 m, 6 col, M20, H/D 0.8, cone 45 deg]",extra axial load per column from wind/seismic (kN),372.69,372.714,PASS,governing: seismic
 "A [200 kL, 12 m, 6 col, M20, H/D 0.8, cone 45 deg]",governing case matches,,,PASS,engine says seismic
-"A [200 kL, 12 m, 6 col, M20, H/D 0.8, cone 45 deg]",column capacity >= factored demand,,,PASS,capacity 1070 kN vs demand 1070 kN
-"A [200 kL, 12 m, 6 col, M20, H/D 0.8, cone 45 deg]",slenderness within IS 456 limit of 60,,,PASS,le/D = 8.4
-"A [500 kL, 16 m, 10 col, M25, H/D 0.9, cone 55 deg]",diameter D (m),8.91,8.91,PASS,
-"A [500 kL, 16 m, 10 col, M25, H/D 0.9, cone 55 deg]",cylinder height incl. 0.3 m freeboard (m),8.319,8.319,PASS,
-"A [500 kL, 16 m, 10 col, M25, H/D 0.9, cone 55 deg]",geometry holds the capacity: pi/4*D^2*H (m3),499.997,500.0,PASS,
-"A [500 kL, 16 m, 10 col, M25, H/D 0.9, cone 55 deg]",wall thickness (mm),270.0,270,PASS,
-"A [500 kL, 16 m, 10 col, M25, H/D 0.9, cone 55 deg]",hoop steel (mm2/m),2336.4,2336.408,PASS,
-"A [500 kL, 16 m, 10 col, M25, H/D 0.9, cone 55 deg]",total dead load (kN),6513.67,6513.674,PASS,
-"A [500 kL, 16 m, 10 col, M25, H/D 0.9, cone 55 deg]",extra axial load per column from wind/seismic (kN),797.83,797.832,PASS,governing: seismic
+"A [200 kL, 12 m, 6 col, M20, H/D 0.8, cone 45 deg]","column diameter at base, incl. own weight (mm)",543.9,543.919,PASS,
+"A [200 kL, 12 m, 6 col, M20, H/D 0.8, cone 45 deg]",foundation load = tank + staging (kN),3339.79,3340.32,PASS,
+"A [200 kL, 12 m, 6 col, M20, H/D 0.8, cone 45 deg]",slenderness within IS 456 limit of 60,,,PASS,le/D = 7.4
+"A [500 kL, 16 m, 10 col, M25, H/D 0.9, cone 55 deg]",diameter D (m),8.26,8.26,PASS,
+"A [500 kL, 16 m, 10 col, M25, H/D 0.9, cone 55 deg]",cylinder height incl. 0.3 m freeboard (m),7.734,7.734,PASS,
+"A [500 kL, 16 m, 10 col, M25, H/D 0.9, cone 55 deg]",water held by cylinder + cone + bottom dome = requested capacity (m3),499.952,500.0,PASS,
+"A [500 kL, 16 m, 10 col, M25, H/D 0.9, cone 55 deg]",wall thickness (mm),240.0,240,PASS,
+"A [500 kL, 16 m, 10 col, M25, H/D 0.9, cone 55 deg]",hoop steel (mm2/m),2008.1,2008.066,PASS,
+"A [500 kL, 16 m, 10 col, M25, H/D 0.9, cone 55 deg]",load at column tops = every member + all the water (kN),6844.83,6844.825,PASS,"dome, wall, cone, bottom dome, ring beam, water"
+"A [500 kL, 16 m, 10 col, M25, H/D 0.9, cone 55 deg]",staging self weight (kN),2169.87,2172.58,PASS,
+"A [500 kL, 16 m, 10 col, M25, H/D 0.9, cone 55 deg]",seismic mass = tank + 1/3 staging (kN),7568.12,7569.019,PASS,
+"A [500 kL, 16 m, 10 col, M25, H/D 0.9, cone 55 deg]",extra axial load per column from wind/seismic (kN),978.78,978.898,PASS,governing: seismic
 "A [500 kL, 16 m, 10 col, M25, H/D 0.9, cone 55 deg]",governing case matches,,,PASS,engine says seismic
-"A [500 kL, 16 m, 10 col, M25, H/D 0.9, cone 55 deg]",column capacity >= factored demand,,,PASS,capacity 2174 kN vs demand 2174 kN
-"A [500 kL, 16 m, 10 col, M25, H/D 0.9, cone 55 deg]",slenderness within IS 456 limit of 60,,,PASS,le/D = 5.9
+"A [500 kL, 16 m, 10 col, M25, H/D 0.9, cone 55 deg]","column diameter at base, incl. own weight (mm)",773.6,773.709,PASS,
+"A [500 kL, 16 m, 10 col, M25, H/D 0.9, cone 55 deg]",foundation load = tank + staging (kN),9014.7,9017.405,PASS,
+"A [500 kL, 16 m, 10 col, M25, H/D 0.9, cone 55 deg]",slenderness within IS 456 limit of 60,,,PASS,le/D = 5.2
 B sanity,bigger capacity -> bigger diameter,,,PASS,
 B sanity,bigger capacity -> more concrete,,,PASS,
 B sanity,stronger concrete grade -> wall not thicker,,,PASS,
@@ -49,9 +61,9 @@ B sanity,weaker soil -> raft chosen (<100 kPa),,,PASS,
 B sanity,full water tank: seismic governs at Zone II-V (matches usual practice),,,PASS,
 B sanity,code path: wind is chosen when seismic force is negligible,,,PASS,
 B sanity,lateral load never negative,,,PASS,
-C literature trend,200 kL: shallow tank (H/D<=0.4) cheaper than H/D 0.9 -- as published,,,PASS,cost 206 vs 208
-C literature trend,400 kL: shallow tank (H/D<=0.4) cheaper than H/D 0.9 -- as published,,,PASS,cost 331 vs 363
-C literature trend,600 kL: shallow tank (H/D<=0.4) cheaper than H/D 0.9 -- as published,,,PASS,cost 480 vs 523
-C literature trend,800 kL: shallow tank (H/D<=0.4) cheaper than H/D 0.9 -- as published,,,PASS,cost 642 vs 699
-C literature trend,1000 kL: shallow tank (H/D<=0.4) cheaper than H/D 0.9 -- as published,,,PASS,cost 805 vs 895
-C literature trend,1200 kL: shallow tank (H/D<=0.4) cheaper than H/D 0.9 -- as published,,,PASS,cost 977 vs 1106
+C literature trend,200 kL: shallow tank (H/D<=0.4) cheaper than H/D 0.9 -- as published,,,PASS,cost 236 vs 238
+C literature trend,400 kL: shallow tank (H/D<=0.4) cheaper than H/D 0.9 -- as published,,,PASS,cost 354 vs 390
+C literature trend,600 kL: shallow tank (H/D<=0.4) cheaper than H/D 0.9 -- as published,,,PASS,cost 491 vs 563
+C literature trend,800 kL: shallow tank (H/D<=0.4) cheaper than H/D 0.9 -- as published,,,PASS,cost 644 vs 751
+C literature trend,1000 kL: shallow tank (H/D<=0.4) cheaper than H/D 0.9 -- as published,,,PASS,cost 809 vs 951
+C literature trend,1200 kL: shallow tank (H/D<=0.4) cheaper than H/D 0.9 -- as published,,,PASS,cost 976 vs 1166

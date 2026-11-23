@@ -24,11 +24,16 @@ from contextlib import redirect_stdout
 from functools import wraps
 
 from flask import (Flask, abort, flash, g, redirect, render_template, request,
-                   session, url_for)
+                   send_file, session, url_for)
 from werkzeug.security import check_password_hash, generate_password_hash
 
 import construction_tracker as ct
 import optimizer as opt
+import regional_planner as rp
+import visualize_tank as vt
+from cost_model import total_relative_cost
+from intze_design_engine import design_intze_tank
+from models import DesignInputs
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("INTZE_SECRET_KEY", "demo-only-change-me")
@@ -209,6 +214,148 @@ def design():
             flash("The design could not be computed for these inputs. Check them and try again.", "error")
     return render_template("design.html", page="design", form=form, results=results,
                            dropped=dropped, limits=DESIGN_LIMITS)
+
+
+# ------------------------------------------------------------ vendor script (not stored in the project)
+@app.route("/vendor/plotly.js")
+@need("view")
+def vendor_plotly():
+    """Serves the Plotly.js file from the installed plotly package, so the pages
+    work offline and the project repository does not contain a copy of the library."""
+    import plotly
+    path = os.path.join(os.path.dirname(plotly.__file__), "package_data", "plotly.min.js")
+    if not os.path.exists(path):
+        abort(404)
+    return send_file(path, mimetype="application/javascript", max_age=86400)
+
+
+# ------------------------------------------------------------ design detail (3D + printable summary)
+OUTPUT_ROWS = [
+    ("Geometry", [
+        ("Internal diameter", "internal_diameter_m", "m"), ("Cylinder height (with free board)", "cylindrical_wall_height_m", "m"),
+        ("Water held (cylinder + cone + bottom dome)", "actual_water_volume_m3", "m³"),
+        ("Cone bottom diameter", "cone_bottom_diameter_m", "m"), ("Cone slant height", "cone_slant_height_m", "m"),
+        ("Top dome rise", "top_dome_rise_m", "m"), ("Bottom dome rise", "bottom_dome_rise_m", "m")]),
+    ("Shell members", [
+        ("Wall thickness", "cylindrical_wall_thickness_mm", "mm"), ("Hoop steel in wall", "cylindrical_wall_hoop_steel_mm2_per_m", "mm² per m"),
+        ("Top dome thickness", "top_dome_thickness_mm", "mm"), ("Bottom dome thickness", "bottom_dome_thickness_mm", "mm"),
+        ("Ring beam tension (simplified)", "ring_beam_hoop_tension_kn", "kN"), ("Ring beam size", None, "mm")]),
+    ("Staging and foundation", [
+        ("Column diameter (at base)", "staging_column_diameter_mm", "mm"), ("Bracing tiers", "staging_num_bracing_tiers", ""),
+        ("Governing lateral case", "governing_lateral_case", ""), ("Extra axial load per column", "staging_extra_axial_per_column_kn", "kN"),
+        ("Load at column tops", "total_dead_load_kn", "kN"), ("Staging self weight", "staging_self_weight_kn", "kN"),
+        ("Load on foundation", "foundation_load_kn", "kN"), ("Foundation type", "foundation_type", ""), ("Foundation size", "foundation_size_m", "m")]),
+    ("Quantities (rough)", [
+        ("Concrete in total", "concrete_volume_m3", "m³"), ("of which cone", "cone_volume_m3", "m³"),
+        ("of which bracing beams", "bracing_volume_m3", "m³"), ("of which foundation", "foundation_volume_m3", "m³"),
+        ("Steel (assumed intensities)", "estimated_steel_kg", "kg")]),
+]
+
+
+def _num(name, lo, hi, label, source):
+    raw = (source.get(name) or "").strip()
+    try:
+        v = float(raw)
+    except ValueError:
+        raise ValueError(f"{label}: enter a number.")
+    if not lo <= v <= hi:
+        raise ValueError(f"{label} must be between {lo} and {hi}.")
+    return v
+
+
+@app.route("/design/detail")
+@need("view")
+def design_detail():
+    src = request.args
+    try:
+        vals = {k: _num(k, lo, hi, label, src) for k, (lo, hi, label) in DESIGN_LIMITS.items()}
+        n = int(_num("num_columns", 6, 16, "Columns", src))
+        grade = int(_num("grade", 20, 40, "Concrete grade", src))
+        if grade not in (20, 25, 30, 35, 40):
+            raise ValueError("Concrete grade must be 20, 25, 30, 35 or 40.")
+    except ValueError as e:
+        flash(str(e), "error")
+        return redirect(url_for("design"))
+    inputs = DesignInputs(
+        capacity_liters=vals["capacity_kl"] * 1000, staging_height_m=vals["staging_height_m"], num_columns=n,
+        soil_bearing_capacity_kpa=vals["soil_bearing_kpa"], concrete_grade_mpa=float(grade),
+        basic_wind_speed_m_s=vals["wind_speed_m_s"], seismic_zone_factor=vals["seismic_zone_factor"])
+    out = design_intze_tank(inputs)
+    cost = total_relative_cost(out.concrete_volume_m3, grade, n, out.estimated_steel_kg)
+    fig = vt.make_single_figure(inputs, out, cost)
+    sections = []
+    for title, rows in OUTPUT_ROWS:
+        items = []
+        for label, field, unit in rows:
+            if field is None:
+                val = f"{out.ring_beam_width_mm:.0f} × {out.ring_beam_depth_mm:.0f}"
+            else:
+                v = getattr(out, field)
+                val = f"{v:,.2f}".rstrip("0").rstrip(".") if isinstance(v, float) else str(v)
+            items.append((label, val, unit))
+        sections.append((title, items))
+    slender = [w for w in out.warnings if "Slenderness" in w]
+    return render_template("detail.html", page="design", inputs=inputs, out=out, cost=cost,
+                           sections=sections, fig_json=fig.to_json(), vals=vals, n=n, grade=grade,
+                           slender=slender)
+
+
+# ------------------------------------------------------------ regional planner
+DEMO_ZONES_CSV = """name,lat,lon,population,area_km2,density_per_km2,lpcd,growth_rate_pct
+DEMO Zone A,26.7200,88.4300,18000,,,135,1.5
+DEMO Zone B,26.7290,88.4380,12000,,,135,1.5
+DEMO Zone C,26.7120,88.4420,,1.80,6500,135,2.0
+DEMO Zone D,26.7350,88.4250,6000,,,100,1.0
+DEMO Zone E,26.7080,88.4250,,0.66,5500,135,1.5
+DEMO Zone F,26.7400,88.4500,9500,,,135,1.5
+"""
+
+
+@app.route("/regional", methods=["GET", "POST"])
+@need("view")
+def regional():
+    text = DEMO_ZONES_CSV
+    result = None
+    if request.method == "POST":
+        text = (request.form.get("zones") or "").strip() + "\n"
+        if len(text) > 20000:
+            flash("That is too much text for a zone list (limit 20,000 characters).", "error")
+            return render_template("regional.html", page="regional", text=text, result=None)
+        try:
+            zones = rp.load_zones_from_text(text)
+            if not zones:
+                raise ValueError("No zones found. The first line must be the column names.")
+            arrangements = quiet(rp.plan, zones)
+            if not arrangements:
+                flash("No arrangement satisfies the service-radius and tank-size limits. "
+                      "Increase the radius, allow bigger tanks or add zones.", "error")
+            else:
+                best = min(arrangements, key=rp.total)
+                fig = rp.build_plain_map_figure(zones, best)
+                tanks = []
+                for i, grp in enumerate(sorted(best["groups"], key=lambda g_: g_["zones"]), 1):
+                    d = grp["design"]
+                    tanks.append({"no": i, "cap": grp["capacity_kl"], "need": grp["need_kl"],
+                                  "serves": ", ".join(zones[j]["name"] for j in grp["zones"]),
+                                  "staging": grp["staging_m"], "far": max(grp["dists"]), "d": d})
+                by_k = []
+                for k in sorted({a_["k"] for a_ in arrangements}):
+                    a2 = min((x for x in arrangements if x["k"] == k), key=rp.total)
+                    by_k.append({"k": k, "total": rp.total(a2), "tank": a2["tank_cost"],
+                                 "oh": rp.SITE_OVERHEAD * k, "dist": a2["dist_cost"], "best": a2 is best})
+                sens = []
+                for oh in (0, 10, 20, 40, 80, 160, 320):
+                    b2 = min(arrangements, key=lambda a_: rp.total(a_, oh))
+                    sens.append({"oh": oh, "k": b2["k"], "total": rp.total(b2, oh)})
+                result = {"zones": zones, "tanks": tanks, "best": best, "total": rp.total(best),
+                          "by_k": by_k, "sens": sens, "fig_json": fig.to_json(),
+                          "years": rp.DESIGN_YEARS, "frac": rp.STORAGE_FRACTION,
+                          "radius": rp.MAX_SERVICE_RADIUS_KM, "overhead": rp.SITE_OVERHEAD}
+        except SystemExit as e:
+            flash(str(e), "error")
+        except Exception as e:
+            flash(f"Could not read the zone list: {e}", "error")
+    return render_template("regional.html", page="regional", text=text, result=result)
 
 
 @app.route("/advice")

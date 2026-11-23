@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}Design details · Intze Tank Platform{% endblock %}
+{% block content %}
+<section class="printable">
+  <div class="noprint"><a class="note" href="javascript:history.back()">← back to the options</a></div>
+  <h2>{{ n }} columns, M{{ grade }}</h2>
+  <p class="sub">Capacity {{ '%.0f'|format(vals.capacity_kl) }} kL · staging {{ '%.1f'|format(vals.staging_height_m) }} m · wind {{ '%.0f'|format(vals.wind_speed_m_s) }} m/s · seismic factor {{ vals.seismic_zone_factor }} · soil {{ '%.0f'|format(vals.soil_bearing_kpa) }} kPa · relative cost {{ '%.1f'|format(cost) }}</p>
+
+  {% if slender %}<div class="alert"><b>Not valid as shown.</b> {{ slender[0] }}</div>{% endif %}
+  {% for w in out.warnings if 'Slenderness' not in w %}<div class="alert"><b>Note.</b> {{ w }}</div>{% endfor %}
+
+  <div class="card noprint" style="padding:8px">
+    <div id="tank3d" role="img" aria-label="3D model of the tank"></div>
+  </div>
+  <p class="note noprint">Drag to rotate, scroll to zoom. A schematic: column positions and bracing are illustrative.</p>
+
+  <div class="grid g2" style="margin-top:28px">
+    {% for title, items in sections %}
+    <div class="card">
+      <h3 style="margin-bottom:14px">{{ title }}</h3>
+      <table class="kv">
+        {% for label, val, unit in items %}<tr><td>{{ label }}</td><td>{{ val }} {{ unit }}</td></tr>{% endfor %}
+      </table>
+    </div>
+    {% endfor %}
+  </div>
+
+  <div class="card" style="margin-top:16px">
+    <h3 style="margin-bottom:14px">Assumptions used for this design</h3>
+    <ul class="assump">{% for a in out.assumptions %}<li>{{ a }}</li>{% endfor %}</ul>
+  </div>
+  <p class="note" style="margin-top:18px">Decision-support only. Costs are relative (illustrative), wind and seismic use simplified static methods, and several members (ring beam, cone, raft, bracing) use placeholder rules. A licensed structural engineer must check and sign off any design before use.</p>
+  <p class="noprint" style="margin-top:24px"><button class="btn primary" type="button" onclick="window.print()">Print or save as PDF</button></p>
+</section>
+<script src="{{ url_for('vendor_plotly') }}"></script>
+<script>
+  var fig = {{ fig_json|safe }};
+  Plotly.newPlot('tank3d', fig.data, fig.layout, {responsive: true, displaylogo: false});
+</script>
+{% endblock %}

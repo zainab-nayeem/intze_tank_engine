@@ -2,3 +2,14 @@ __pycache__/
 *.joblib 
 tank_3d.html 
 regional_map*.html 
+
+*.pyc
+backup_v04/
+backup_v05/
+project_state.json
+plotly.min.js
+regional_map.html
+regional_map_plain.html
+regional_plan.csv
+adaptive_log.csv
+validation_report.csv

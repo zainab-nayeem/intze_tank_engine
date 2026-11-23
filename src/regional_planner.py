@@ -72,8 +72,19 @@ def _f(v, default=None):
 
 
 def load_zones(path):
-    zones = []
     with open(path, newline="", encoding="utf-8-sig") as f:
+        return load_zones_from_reader(f)
+
+
+def load_zones_from_text(text):
+    """Same as load_zones but from CSV text (used by the web app)."""
+    import io
+    return load_zones_from_reader(io.StringIO(text.lstrip("\ufeff")))
+
+
+def load_zones_from_reader(f):
+    zones = []
+    if True:
         for row in csv.DictReader(f):
             z = {"name": row["name"].strip(), "notes": []}
             lat, lon = _f(row.get("lat")), _f(row.get("lon"))
@@ -188,6 +199,7 @@ def evaluate_group(zones, idx):
 
 
 def plan(zones):
+    _group_cache.clear()      # the cache is keyed by zone numbers only, so it must be reset for every new set of zones
     if len(zones) > MAX_ZONES_EXACT:
         raise SystemExit(f"{len(zones)} zones is too many for exact search (max {MAX_ZONES_EXACT}). "
                          "Merge neighbouring zones and try again.")
@@ -296,7 +308,7 @@ def save_outputs(zones, best):
                                                lon=sum(z["lon"] for z in zones) / len(zones)), zoom=12.5),
                           margin=dict(l=0, r=0, t=40, b=0), height=700,
                           title=f"Regional plan: {best['k']} tank(s) (zones blue, tanks red)")
-        fig.write_html("regional_map.html", include_plotlyjs=True)
+        fig.write_html("regional_map.html", include_plotlyjs="directory")
         save_plain_map(zones, best)
         print("\nSaved: regional_plan.csv, regional_map_plain.html, regional_map.html (street map, needs internet)")
     except Exception as e:                                   # map is a bonus; never block the plan
@@ -305,6 +317,11 @@ def save_outputs(zones, best):
 
 def save_plain_map(zones, best):
     """Offline map (no tiles needed): zones, tanks and service links on lat/lon axes."""
+    fig = build_plain_map_figure(zones, best)
+    fig.write_html("regional_map_plain.html", include_plotlyjs="directory")   # keeps the page itself clean
+
+
+def build_plain_map_figure(zones, best):
     import plotly.graph_objects as go
     fig = go.Figure()
     for g in best["groups"]:
@@ -331,7 +348,7 @@ def save_plain_map(zones, best):
         yaxis=dict(title="latitude", showgrid=True, gridcolor="#e6e6e6",
                    scaleanchor="x", scaleratio=1 / math.cos(math.radians(mean_lat))),
         plot_bgcolor="white", paper_bgcolor="white", height=700, margin=dict(l=60, r=20, t=60, b=50))
-    fig.write_html("regional_map_plain.html", include_plotlyjs=True)
+    return fig
 
 
 if __name__ == "__main__":
